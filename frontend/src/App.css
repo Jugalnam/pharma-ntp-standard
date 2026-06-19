@@ -1,0 +1,84 @@
+.app {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+  text-align: left;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 1.8rem;
+}
+
+.subtitle {
+  color: #555;
+  margin: 0.3rem 0;
+}
+
+.subtitle code {
+  margin-left: 0.4rem;
+  background: #f0f0f0;
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  font-size: 0.85em;
+}
+
+.status .ok {
+  color: #1a7f37;
+  font-weight: 600;
+}
+.status .warn {
+  color: #b35900;
+  font-weight: 600;
+}
+
+.error {
+  background: #fff0f0;
+  border: 1px solid #e0b4b4;
+  color: #a12622;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  margin: 1rem 0;
+}
+
+.empty {
+  color: #777;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.5rem;
+}
+
+th,
+td {
+  border-bottom: 1px solid #e3e3e3;
+  padding: 0.5rem 0.6rem;
+  text-align: left;
+  font-size: 0.92rem;
+}
+
+th {
+  color: #444;
+  font-weight: 600;
+}
+
+footer {
+  margin-top: 2.5rem;
+  font-size: 0.85rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  .subtitle {
+    color: #bbb;
+  }
+  .subtitle code {
+    background: #2a2a2a;
+  }
+  th,
+  td {
+    border-color: #333;
+  }
+}
