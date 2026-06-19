@@ -11,8 +11,9 @@ from app.models.schemas import (
     Asset, AssetIn,
     TimeStandard, TimeStandardIn,
     Deliverable, DeliverableIn, DeliverableStatus,
+    OffsetSample, Alert,
 )
-from app.services.alerts import is_offset_breach
+from app.services.monitor import Monitor
 
 router = APIRouter(prefix="/api")
 
@@ -21,6 +22,9 @@ _standards: dict[int, TimeStandard] = {}
 _assets: dict[int, Asset] = {}
 _deliverables: dict[int, Deliverable] = {}
 _seq = {"standard": 0, "asset": 0, "deliverable": 0}
+
+# 모니터링 엔진(FS-020~023). 인메모리 상태 보유.
+monitor = Monitor()
 
 
 def _next(key: str) -> int:
@@ -72,25 +76,40 @@ def create_asset(body: AssetIn):
     return asset
 
 
-# --- 대시보드 (FS-021) ---
+# --- 모니터링 (FS-020/021/022/023) ---
+@router.post("/assets/{aid}/poll", response_model=OffsetSample)
+def poll_asset(aid: int):
+    """장비의 표준 source_host에 NTP 질의해 오프셋을 1회 수집한다(FS-020)."""
+    if aid not in _assets:
+        raise HTTPException(404, "asset not found")
+    asset = _assets[aid]
+    std = _standards.get(asset.standard_id) if asset.standard_id else None
+    if std is None:
+        raise HTTPException(409, "asset has no time standard assigned")
+    try:
+        return monitor.poll(asset, std)
+    except Exception as e:  # NTP 도달 실패 등
+        raise HTTPException(502, f"NTP measurement failed: {e}")
+
+
 @router.get("/dashboard")
 def dashboard():
-    """장비별 최신 상태 요약. (오프셋 수집 워커 연동은 후속 반복)"""
-    now = datetime.now(timezone.utc).isoformat()
-    rows = []
-    for a in _assets.values():
-        std = _standards.get(a.standard_id) if a.standard_id else None
-        limit = std.max_offset_ms if std else settings.default_max_offset_ms
-        rows.append({
-            "asset_id": a.id,
-            "name": a.name,
-            "gxp_critical": a.gxp_critical,
-            "offset_ms": None,        # 워커 연동 전 placeholder
-            "max_offset_ms": limit,
-            "status": "UNKNOWN",
-            "last_sync": None,
-        })
-    return {"generated_at": now, "assets": rows}
+    """장비별 최신 오프셋·상태 요약(FS-021). 상태는 UNKNOWN/STALE/BREACH/OK."""
+    now = datetime.now(timezone.utc)
+    rows = [
+        monitor.dashboard_row(
+            a, _standards.get(a.standard_id) if a.standard_id else None,
+            settings.default_max_offset_ms, now,
+        )
+        for a in _assets.values()
+    ]
+    return {"generated_at": now.isoformat(), "assets": rows}
+
+
+@router.get("/alerts", response_model=list[Alert])
+def list_alerts():
+    """경고 발생/해제 이력(FS-023)."""
+    return monitor.alerts
 
 
 # --- 검증 산출물 (FS-030/031) ---

@@ -38,6 +38,7 @@ npm run lint       # eslint .
 - `api/routes.py` — 모든 REST 엔드포인트(`/api` prefix). **인메모리 dict 저장소**(`_standards`/`_assets`/`_deliverables`)와 정수 시퀀스를 모듈 전역으로 보유
 - `services/ntp.py` — `measure_offset()`: 다중 샘플 **중앙값**으로 오프셋 측정(RISK-004 완화)
 - `services/alerts.py` — `is_offset_breach()`: 오프셋 한계 초과 판정. **경계 규칙: 한계와 같으면 합격, 초과해야 경고.** 이 프로젝트에서 가장 위험도 높은 로직(RISK-001)
+- `services/monitor.py` — `Monitor`: 측정(ntp)과 경고 판정(alerts)을 연결하는 모니터링 엔진. 오프셋 샘플 기록, 경고 OPEN↔CLOSED 전이(FS-022/023), 대시보드 상태 `UNKNOWN/STALE/BREACH/OK` 산정. `STALE`은 last_sync 노후(=poll_interval×`STALE_FACTOR` 초과) 감지로 RISK-003 완화. `routes.py`가 전역 `monitor` 인스턴스 보유
 - `models/schemas.py` — Pydantic 도메인 모델. `*In` 입력 모델을 상속해 `id`/`version` 추가하는 패턴
 
 **핵심 도메인 규칙:**
@@ -57,4 +58,4 @@ npm run lint       # eslint .
 
 ## 후속 반복 예정 (현재 미구현)
 
-`routes.py`/`schemas.py` 주석에 명시된 대로 SQLAlchemy(SQLite→PostgreSQL) 전환, 오프셋 폴링 워커(`OffsetSample`/`Alert`를 실제로 채움), 감사 추적(FS-040)이 예정되어 있다. 대시보드의 `offset_ms`/`status`는 워커 연동 전 placeholder다.
+모니터링 엔진은 구현됐고(수동 폴링 `POST /api/assets/{id}/poll` → 실측 → 대시보드/경고), OQ-020/021/022/023이 실측 검증을 통과했다. 남은 예정 작업: **주기적 백그라운드 폴링 스케줄러**(현재는 수동 트리거만), SQLAlchemy(SQLite→PostgreSQL) 전환, **감사 추적(FS-040, OQ-040 유보 중)** 및 표준 변경 이력(OQ-002 PARTIAL). 검증 진행 현황은 `docs/07-iq-protocol.md`·`docs/08-oq-protocol.md`의 결과 열 참조.
