@@ -30,7 +30,8 @@
 | 02 | [기능 명세 (FS)](02-functional-spec.md) | FS | 좌 중간 | Draft |
 | 03 | [설계 명세 (DS)](03-design-spec.md) | DS | 좌 최하단 | Draft |
 | 04 | [위험 평가 (RA)](04-risk-assessment.md) | RISK | 횡단 | Draft |
-| 05 | [추적성 매트릭스 (RTM)](06-traceability-matrix.md) | — | 좌↔우 연결 | Draft |
+| 05 | [UTCk 기준 표준 분석](05-utck-reference-analysis.md) | REF | URS-001 근거 / 교차점검 전제 | Draft |
+| 06 | [추적성 매트릭스 (RTM)](06-traceability-matrix.md) | — | 좌↔우 연결 | Draft |
 | 06 | [IQ 프로토콜](07-iq-protocol.md) | IQ | 우 최하단 | Draft |
 | 07 | [OQ 프로토콜](08-oq-protocol.md) | OQ | 우 중간 | Draft |
 | 08 | [PQ 프로토콜](09-pq-protocol.md) | PQ | 우 최상단 | Draft |
