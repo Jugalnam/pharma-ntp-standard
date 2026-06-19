@@ -17,6 +17,7 @@ pytest                                  # 전체 테스트
 pytest tests/test_alerts.py             # 단일 파일
 pytest tests/test_alerts.py::test_is_offset_breach   # 단일 테스트
 ```
+테스트는 `test_alerts.py`(경계값/RISK-001), `test_monitor.py`(모니터링 엔진·상태 전이), `test_api.py`(엔드포인트·httpx) 세 파일이다.
 `is_offset_breach`에는 doctest가 있으나 기본 pytest 실행에는 포함되지 않는다(`--doctest-modules`로 별도 실행).
 
 ### Frontend (`frontend/`)
@@ -26,11 +27,12 @@ npm run dev        # Vite. /api 요청은 localhost:8000(백엔드)로 프록시
 npm run build      # tsc -b && vite build
 npm run lint       # eslint .
 ```
-백엔드를 먼저 띄워야 대시보드/health가 동작한다. CORS는 `http://localhost:5173`만 허용(`app/main.py`).
+백엔드를 먼저 띄워야 대시보드/health가 동작한다. `/api` 프록시는 `vite.config.ts`, CORS는 `http://localhost:5173`만 허용(`app/main.py`).
 
 ## 아키텍처
 
 3계층 구조 — `docs/`(설계 산출물) → `backend/`(FastAPI) → `frontend/`(React).
+> 루트의 `UTCk/`·`UTCk.zip`은 KRISS 공식 동기화 프로그램(타사 바이너리) 참조본으로, `.gitignore`로 제외된 **코드베이스 외부** 자료다(분석은 `docs/05-utck-reference-analysis.md`).
 
 **Backend 레이어** (`backend/app/`):
 - `main.py` — FastAPI 진입점, CORS, 라우터 등록
@@ -40,6 +42,8 @@ npm run lint       # eslint .
 - `services/alerts.py` — `is_offset_breach()`: 오프셋 한계 초과 판정. **경계 규칙: 한계와 같으면 합격, 초과해야 경고.** 이 프로젝트에서 가장 위험도 높은 로직(RISK-001)
 - `services/monitor.py` — `Monitor`: 측정(ntp)과 경고 판정(alerts)을 연결하는 모니터링 엔진. 오프셋 샘플 기록, 경고 OPEN↔CLOSED 전이(FS-022/023), 대시보드 상태 `UNKNOWN/STALE/BREACH/OK` 산정. `STALE`은 last_sync 노후(=poll_interval×`STALE_FACTOR` 초과) 감지로 RISK-003 완화. `routes.py`가 전역 `monitor` 인스턴스 보유
 - `models/schemas.py` — Pydantic 도메인 모델. `*In` 입력 모델을 상속해 `id`/`version` 추가하는 패턴
+
+**Frontend** (`frontend/src/`): 라우터·컴포넌트 분리 없이 단일 `App.tsx` 골격이다. 마운트 시 `/api/health`(상태·기준 소스)와 `/api/dashboard`(장비별 오프셋/상태 행)를 fetch해 표시. 새 화면은 여기서 확장한다 — 별도 컴포넌트 디렉터리는 아직 없다.
 
 **핵심 도메인 규칙:**
 - 표준(`TimeStandard`)은 PUT 시 `version`이 증가한다(FS-002).
