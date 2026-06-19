@@ -35,6 +35,7 @@
 | 06 | [IQ 프로토콜](07-iq-protocol.md) | IQ | 우 최하단 | Draft |
 | 07 | [OQ 프로토콜](08-oq-protocol.md) | OQ | 우 중간 | Draft |
 | 08 | [PQ 프로토콜](09-pq-protocol.md) | PQ | 우 최상단 | Draft |
+| 09 | [KRISS 표준 정합성 검증 요약 보고서](10-kriss-conformance-report.md) | VSR | 전체 종합 (KRISS 표준 증명) | Draft |
 
 ## 문서 상태 정의
 
