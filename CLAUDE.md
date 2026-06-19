@@ -1,0 +1,60 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## 프로젝트 개요
+
+제약(GxP) 환경에서 **NTP 시간 동기화 표준을 수립·모니터링·검증**하는 웹 앱이다. 기준 시간 소스는 한국표준과학연구원의 **UTC(KRISS)** (`time.kriss.re.kr`)이며, GMP 데이터 무결성(ALCOA+) / CSV 요구사항을 전제로 **GAMP 5 V 모델**에 따라 설계한다. 현재는 **인메모리 골격** 단계다(영속 저장소·폴링 워커·감사 추적 미연결).
+
+## 명령어
+
+### Backend (`backend/`)
+```bash
+python -m venv .venv && source .venv/Scripts/activate   # Windows Git Bash
+pip install -r requirements.txt
+uvicorn app.main:app --reload          # http://localhost:8000 (Swagger: /docs)
+pytest                                  # 전체 테스트
+pytest tests/test_alerts.py             # 단일 파일
+pytest tests/test_alerts.py::test_is_offset_breach   # 단일 테스트
+```
+`is_offset_breach`에는 doctest가 있으나 기본 pytest 실행에는 포함되지 않는다(`--doctest-modules`로 별도 실행).
+
+### Frontend (`frontend/`)
+```bash
+npm install
+npm run dev        # Vite. /api 요청은 localhost:8000(백엔드)로 프록시
+npm run build      # tsc -b && vite build
+npm run lint       # eslint .
+```
+백엔드를 먼저 띄워야 대시보드/health가 동작한다. CORS는 `http://localhost:5173`만 허용(`app/main.py`).
+
+## 아키텍처
+
+3계층 구조 — `docs/`(설계 산출물) → `backend/`(FastAPI) → `frontend/`(React).
+
+**Backend 레이어** (`backend/app/`):
+- `main.py` — FastAPI 진입점, CORS, 라우터 등록
+- `config.py` — `Settings`(pydantic-settings). 환경변수 접두사 `NTP_`. 기준 호스트·기본 오프셋 한계 등
+- `api/routes.py` — 모든 REST 엔드포인트(`/api` prefix). **인메모리 dict 저장소**(`_standards`/`_assets`/`_deliverables`)와 정수 시퀀스를 모듈 전역으로 보유
+- `services/ntp.py` — `measure_offset()`: 다중 샘플 **중앙값**으로 오프셋 측정(RISK-004 완화)
+- `services/alerts.py` — `is_offset_breach()`: 오프셋 한계 초과 판정. **경계 규칙: 한계와 같으면 합격, 초과해야 경고.** 이 프로젝트에서 가장 위험도 높은 로직(RISK-001)
+- `models/schemas.py` — Pydantic 도메인 모델. `*In` 입력 모델을 상속해 `id`/`version` 추가하는 패턴
+
+**핵심 도메인 규칙:**
+- 표준(`TimeStandard`)은 PUT 시 `version`이 증가한다(FS-002).
+- 산출물(`Deliverable`) 상태는 `Draft → Reviewed → Approved → Effective` 순서로만 전이 가능. 건너뛰기·역방향은 409. 규칙은 `routes.py`의 `_TRANSITIONS` 딕셔너리에 정의(RISK-005).
+
+## V 모델 추적성 규약 (이 저장소에서 가장 중요)
+
+코드와 테스트는 **`docs/`의 검증 산출물 ID와 양방향으로 연결**되어 있다. 코드 주석/docstring/테스트에 박힌 `URS-xxx`, `FS-xxx`, `DS-xxx`, `RISK-xxx`, `IQ/OQ/PQ-xxx` 태그는 장식이 아니라 추적성 매트릭스(`docs/06-traceability-matrix.md`)의 실제 항목이다.
+
+- 좌측 가지(분해): URS(요구) → FS(기능) → DS(설계) → 구현
+- 우측 가지(검증): IQ(설치) ↔ DS, OQ(운영) ↔ FS, PQ(성능) ↔ URS
+- **기능·위험을 추가/변경하면 대응하는 `docs/` 산출물과 RTM도 함께 갱신**해야 추적성이 깨지지 않는다. 새 테스트는 검증하는 OQ/PQ ID를 주석에 명시하는 관례를 따른다(`test_alerts.py`가 OQ-022a/b를 검증하는 식).
+- High 위험(RISK-001 등)은 반드시 경계값 단위 테스트로 입증한다.
+
+설계가 코드보다 먼저다 — 새 기능 작업 전 `docs/README.md`와 해당 산출물을 먼저 읽는다.
+
+## 후속 반복 예정 (현재 미구현)
+
+`routes.py`/`schemas.py` 주석에 명시된 대로 SQLAlchemy(SQLite→PostgreSQL) 전환, 오프셋 폴링 워커(`OffsetSample`/`Alert`를 실제로 채움), 감사 추적(FS-040)이 예정되어 있다. 대시보드의 `offset_ms`/`status`는 워커 연동 전 placeholder다.
