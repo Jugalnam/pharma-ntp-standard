@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 제약(GxP) 환경에서 **NTP 시간 동기화 표준을 수립·모니터링·검증**하는 웹 앱이다. 기준 시간 소스는 한국표준과학연구원의 **UTC(KRISS)** (`time.kriss.re.kr`)이며, GMP 데이터 무결성(ALCOA+) / CSV 요구사항을 전제로 **GAMP 5 V 모델**에 따라 설계한다. 현재는 **인메모리 골격** 단계다(영속 저장소·폴링 워커·감사 추적 미연결).
 
+> 공식 인증 제품이 **아니라** UTCk에 *준하는* 오픈소스 참조 구현이다(`README.md`). 실제 규제 환경 적용 시 별도 검증이 필요하다는 전제를 코드/문서 변경 시 깨지 않게 유지한다.
+
 ## 명령어
 
 ### Backend (`backend/`)
@@ -19,6 +21,7 @@ pytest tests/test_alerts.py::test_is_offset_breach   # 단일 테스트
 ```
 테스트는 `test_alerts.py`(경계값/RISK-001), `test_monitor.py`(모니터링 엔진·상태 전이), `test_api.py`(엔드포인트·httpx) 세 파일이다.
 `is_offset_breach`에는 doctest가 있으나 기본 pytest 실행에는 포함되지 않는다(`--doctest-modules`로 별도 실행).
+`pytest.ini`/`conftest.py`/`pyproject.toml`이 없다 — 기본 discovery에 의존하므로 **`backend/`에서** 실행해야 import가 풀린다. `requirements.txt`도 `backend/`에 있다.
 
 ### Frontend (`frontend/`)
 ```bash
@@ -58,7 +61,7 @@ npm run lint       # eslint .
 - **기능·위험을 추가/변경하면 대응하는 `docs/` 산출물과 RTM도 함께 갱신**해야 추적성이 깨지지 않는다. 새 테스트는 검증하는 OQ/PQ ID를 주석에 명시하는 관례를 따른다(`test_alerts.py`가 OQ-022a/b를 검증하는 식).
 - High 위험(RISK-001 등)은 반드시 경계값 단위 테스트로 입증한다.
 
-설계가 코드보다 먼저다 — 새 기능 작업 전 `docs/README.md`와 해당 산출물을 먼저 읽는다.
+설계가 코드보다 먼저다 — 새 기능 작업 전 `docs/README.md`(산출물 00–11 인덱스가 권위 있는 지도)와 해당 산출물을 먼저 읽는다. 분석/근거 문서도 RTM 항목이다: `05`(UTCk 참조, REF) · `10`(KRISS 정합성 요약, VSR-001) · `11`(규제·산업 모범사례, REG).
 
 ## 후속 반복 예정 (현재 미구현)
 
