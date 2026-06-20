@@ -6,9 +6,21 @@
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
+header {
+  margin-bottom: 2rem;
+}
 header h1 {
   margin: 0;
   font-size: 1.8rem;
+}
+
+/* 섹션 간 여백 — 화면이 빽빽하지 않게 */
+section {
+  margin-bottom: 2.75rem;
+}
+h2 {
+  font-size: 1.18rem;
+  margin: 0 0 1rem;
 }
 
 .subtitle {
@@ -157,9 +169,12 @@ table {
 th,
 td {
   border-bottom: 1px solid #e3e3e3;
-  padding: 0.5rem 0.6rem;
+  padding: 0.7rem 0.75rem;
   text-align: left;
   font-size: 0.92rem;
+}
+thead th {
+  padding-bottom: 0.55rem;
 }
 
 th {
@@ -170,8 +185,8 @@ th {
 .add-form {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  align-items: center;
+  gap: 0.6rem;
+  align-items: flex-end; /* 라벨 있는 설정 폼에서 버튼이 입력칸과 같은 줄에 오도록 */
 }
 .add-form input,
 .add-form select {
