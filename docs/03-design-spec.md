@@ -40,8 +40,10 @@
 |--------|------|------|----|
 | GET/POST | `/api/standards` | 표준 목록/생성 | FS-001 |
 | GET/PUT | `/api/standards/{id}` | 표준 조회/수정(버전 증가) | FS-001/002 |
-| GET/POST | `/api/assets` | 장비 목록/등록 | FS-010 |
-| GET | `/api/dashboard` | 장비별 최신 오프셋·상태 | FS-021 |
+| GET/POST | `/api/assets` | 장비 목록/등록(POST `?validate=true`면 NTP 응답 확인 후 등록) | FS-010 |
+| DELETE | `/api/assets/{id}` | 장비 등록 해제(모니터링 상태 정리) | FS-010 |
+| POST | `/api/assets/{id}/poll` | 장비 1회 수동 폴링(reachable/reference_synced 반환) | FS-020 |
+| GET | `/api/dashboard` | 장비별 IP·최신 오프셋·상태 | FS-021 |
 | GET | `/api/alerts` | 경고 이력 | FS-023 |
 | GET/POST | `/api/deliverables` | 검증 산출물 | FS-030 |
 | GET | `/api/health` | 헬스체크 | IQ |

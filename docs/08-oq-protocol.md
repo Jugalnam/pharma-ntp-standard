@@ -18,6 +18,8 @@
 | OQ-001 | 표준 생성/조회 (FS-001) | 표준 생성(`time.kriss.re.kr`, 한계 1000ms) 후 조회 | 입력대로 저장·조회됨 | ✅ PASS — 라이브 생성·조회 |
 | OQ-002 | 표준 버전 증가 (FS-002) | 표준 수정 | version +1, 변경 이력 1건 생성 | ⚠️ PARTIAL — version +1 PASS(`test_standard_create_and_version_bump`); 변경 이력은 미구현(일탈 #2) |
 | OQ-010 | 장비 등록/분류 (FS-010/011) | 장비 등록, gxp_critical=true | 목록에 표시, 분류 저장 | ✅ PASS — 라이브 등록, gxp_critical=true 저장 |
+| OQ-026 | 응답 검증 등록 (FS-010) | `validate=true`로 응답/무응답 호스트 각각 등록 시도 | 응답 호스트만 201, 무응답은 422 거부 | ✅ PASS — 라이브: 공개 NTP 20개 시도 → 16 등록/4 거부; `test_asset_create_no_validate_and_delete`(validate=false 우회) |
+| OQ-027 | 장비 삭제 (FS-010) | 등록 장비 DELETE 후 재삭제 | 1차 204, 모니터링 상태 정리, 2차 404 | ✅ PASS — `test_asset_create_no_validate_and_delete` |
 | OQ-011 | 정책 할당 (FS-012) | 장비에 표준 연결 | 연결 반영 | ✅ PASS — standard_id 연결, 폴링에 사용 |
 | OQ-020 | 오프셋 수집·KRISS 보정 (FS-020) | 응답 장비 폴링(`POST /api/assets/{id}/poll`) | 장비 vs KRISS 보정 오프셋 생성, `reachable=true` | ✅ PASS — `test_oq020_poll_per_device_corrected`; 라이브: time.windows.com 보정 offset +0.33ms(원시 KRISS 7673ms 상쇄), stratum 3 |
 | OQ-024 | 장비 무응답 감지 (FS-020, RISK-003) | 무응답 호스트(예 192.0.2.1) 폴링 | `reachable=false`·상태 `UNREACHABLE`, 거짓 측정값 없음 | ✅ PASS — `test_oq020_unreachable_*`; 라이브: 192.0.2.1 → UNREACHABLE, offset null |

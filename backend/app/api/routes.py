@@ -44,20 +44,31 @@ async def run_scheduler() -> None:
     블로킹 NTP 측정은 스레드로 분리해 이벤트 루프를 막지 않는다. 개별 폴링 실패는
     로깅 후 계속하여 한 장비의 무응답이 전체 스케줄러를 멈추지 않게 한다.
     """
-    logger.info("scheduler started (tick=%ss)", settings.scheduler_tick_s)
+    logger.info("scheduler started (tick=%ss, concurrency=%s)",
+                settings.scheduler_tick_s, settings.scheduler_concurrency)
+    sem = asyncio.Semaphore(settings.scheduler_concurrency)
+
+    async def _poll_one(asset: Asset, std: TimeStandard) -> None:
+        # 무응답 장비의 타임아웃 대기가 다른 장비를 막지 않도록 동시 실행(세마포어로 상한).
+        async with sem:
+            try:
+                await asyncio.to_thread(monitor.poll, asset, std)
+            except Exception as e:  # 개별 장비 실패는 격리
+                logger.warning("scheduled poll failed for asset %s: %s", asset.id, e)
+
     try:
         while True:
             await asyncio.sleep(settings.scheduler_tick_s)
             now = datetime.now(timezone.utc)
+            due = []
             for asset in list(_assets.values()):
                 std = _standards.get(asset.standard_id) if asset.standard_id else None
                 if std is None:
                     continue
                 if is_due(monitor.last_attempt.get(asset.id), std.poll_interval_s, now):
-                    try:
-                        await asyncio.to_thread(monitor.poll, asset, std)
-                    except Exception as e:  # 개별 장비 실패는 격리
-                        logger.warning("scheduled poll failed for asset %s: %s", asset.id, e)
+                    due.append((asset, std))
+            if due:
+                await asyncio.gather(*(_poll_one(a, s) for a, s in due))
     except asyncio.CancelledError:
         logger.info("scheduler stopped")
         raise
@@ -142,11 +153,37 @@ def list_assets():
 
 
 @router.post("/assets", response_model=Asset, status_code=201)
-def create_asset(body: AssetIn):
+def create_asset(body: AssetIn, validate: bool = True):
+    """장비 등록(FS-010). validate=true(기본)면 등록 전 NTP 응답을 확인한다.
+
+    응답하지 않는 호스트는 422로 거부한다 — 죽은 장비가 등록부에 들어가지
+    않도록(데이터 무결성). 대량 시드/테스트는 validate=false로 우회 가능.
+    """
+    if validate:
+        try:
+            measure_offset(body.hostname, samples=1, timeout=settings.ntp_timeout_s)
+        except Exception as e:
+            raise HTTPException(
+                422,
+                f"'{body.hostname}'이(가) NTP 응답을 하지 않아 등록할 수 없습니다. "
+                f"(IP/방화벽/NTP 서버 활성화 확인) [{e}]",
+            )
     aid = _next("asset")
     asset = Asset(id=aid, **body.model_dump())
     _assets[aid] = asset
     return asset
+
+
+@router.delete("/assets/{aid}", status_code=204)
+def delete_asset(aid: int):
+    """장비 등록 해제(FS-010). 모니터링 상태도 함께 정리한다."""
+    if aid not in _assets:
+        raise HTTPException(404, "asset not found")
+    del _assets[aid]
+    monitor.latest.pop(aid, None)
+    monitor.unreachable.pop(aid, None)
+    monitor.last_attempt.pop(aid, None)
+    return None
 
 
 # --- 모니터링 (FS-020/021/022/023) ---

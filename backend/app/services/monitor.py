@@ -188,6 +188,7 @@ class Monitor:
         return {
             "asset_id": asset.id,
             "name": asset.name,
+            "hostname": asset.hostname,
             "gxp_critical": asset.gxp_critical,
             "offset_ms": sample.offset_ms if sample else None,
             "max_offset_ms": limit,

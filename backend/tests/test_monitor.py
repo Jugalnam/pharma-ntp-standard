@@ -101,6 +101,13 @@ def test_fs024_poll_records_last_attempt():
     assert m.last_attempt[a.id] == t0
 
 
+def test_dashboard_row_includes_hostname():
+    """대시보드 행에 장비 IP/호스트가 포함된다(프론트 IP 열)."""
+    m, a, s = Monitor(), _asset(), _std()
+    row = m.dashboard_row(a, s, 1000.0)
+    assert row["hostname"] == a.hostname
+
+
 def test_fs052_offset_sanity_bound():
     """FS-052/RISK-009: 비현실적으로 큰 오프셋은 미신뢰(스푸핑 완화)."""
     assert is_plausible_offset(120.0, 3_600_000.0) is True

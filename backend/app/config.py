@@ -21,6 +21,8 @@ class Settings(BaseSettings):
     # 주기적 백그라운드 폴링 스케줄러(FS-024). tick마다 깨어나 due 장비를 측정.
     scheduler_enabled: bool = True
     scheduler_tick_s: float = 10.0
+    # 한 사이클에서 동시에 폴링할 장비 수(무응답 장비가 순차 대기로 전체를 막지 않게).
+    scheduler_concurrency: int = 10
     # 운영 DB로 전환 시 사용 (현재 골격은 인메모리 저장소)
     database_url: str = "sqlite:///./pharma_ntp.sqlite3"
 

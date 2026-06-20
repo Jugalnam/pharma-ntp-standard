@@ -26,6 +26,22 @@ def test_standard_create_and_version_bump():
     assert r2.json()["version"] == 2  # FS-002
 
 
+def test_asset_create_no_validate_and_delete():
+    # validate=false 로 네트워크 없이 등록(FS-010), 이후 삭제
+    r = client.post(
+        "/api/assets?validate=false",
+        json={"name": "X-PC", "hostname": "10.0.0.9", "standard_id": None},
+    )
+    assert r.status_code == 201
+    aid = r.json()["id"]
+    assert r.json()["hostname"] == "10.0.0.9"
+
+    d = client.delete(f"/api/assets/{aid}")
+    assert d.status_code == 204
+    # 이미 삭제됨 → 404
+    assert client.delete(f"/api/assets/{aid}").status_code == 404
+
+
 def test_deliverable_invalid_transition_rejected():
     r = client.post("/api/deliverables", json={"type": "OQ", "title": "OQ 프로토콜"})
     did = r.json()["id"]
