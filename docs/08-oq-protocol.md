@@ -19,7 +19,8 @@
 | OQ-002 | 표준 버전 증가 (FS-002) | 표준 수정 | version +1, 변경 이력 1건 생성 | ⚠️ PARTIAL — version +1 PASS(`test_standard_create_and_version_bump`); 변경 이력은 미구현(일탈 #2) |
 | OQ-010 | 장비 등록/분류 (FS-010/011) | 장비 등록, gxp_critical=true | 목록에 표시, 분류 저장 | ✅ PASS — 라이브 등록, gxp_critical=true 저장 |
 | OQ-011 | 정책 할당 (FS-012) | 장비에 표준 연결 | 연결 반영 | ✅ PASS — standard_id 연결, 폴링에 사용 |
-| OQ-020 | 오프셋 수집 (FS-020) | 폴링 1회 실행(`POST /api/assets/{id}/poll`) | OffsetSample 생성, 값 합리적 범위 | ✅ PASS — KRISS 라이브 offset −0.49ms, stratum 3 |
+| OQ-020 | 오프셋 수집·KRISS 보정 (FS-020) | 응답 장비 폴링(`POST /api/assets/{id}/poll`) | 장비 vs KRISS 보정 오프셋 생성, `reachable=true` | ✅ PASS — `test_oq020_poll_per_device_corrected`; 라이브: time.windows.com 보정 offset +0.33ms(원시 KRISS 7673ms 상쇄), stratum 3 |
+| OQ-024 | 장비 무응답 감지 (FS-020, RISK-003) | 무응답 호스트(예 192.0.2.1) 폴링 | `reachable=false`·상태 `UNREACHABLE`, 거짓 측정값 없음 | ✅ PASS — `test_oq020_unreachable_*`; 라이브: 192.0.2.1 → UNREACHABLE, offset null |
 | OQ-021 | 대시보드 (FS-021) | `/api/dashboard` 호출 | 장비별 최신 오프셋·stratum·last_sync 반환 | ✅ PASS — offset/stratum/last_sync/status=OK 반환 |
 | **OQ-022a** | 한계 **이내** (FS-022, RISK-001) | 오프셋 = 한계−1ms 주입 | 경고 **미발생**, 상태 OK | ✅ PASS — `test_oq022a_within_limit_no_alert` |
 | **OQ-022b** | 한계 **초과** (FS-022, RISK-001) | 오프셋 = 한계+1ms 주입 | 경고 **발생**, 상태 BREACH | ✅ PASS — `test_oq022b_over_limit_breach` |

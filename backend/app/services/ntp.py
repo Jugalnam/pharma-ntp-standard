@@ -2,6 +2,9 @@
 
 KRISS UTC(k) 등 신뢰 시간 소스에 질의하여 로컬 대비 오프셋(ms)을 측정한다.
 [RISK-004] 단발 측정의 네트워크 지연 오탐을 줄이기 위해 다중 샘플 중앙값을 사용한다.
+
+[FS-051] 측정은 NTP 클라이언트 모드(mode 3) **읽기**로만 수행한다. 시각 설정·
+제어 모드(mode 6/7)를 사용하지 않으므로 대상 장비의 시각·설정을 변경하지 않는다.
 """
 from __future__ import annotations
 from dataclasses import dataclass
@@ -32,3 +35,16 @@ def measure_offset(host: str, samples: int = 3, timeout: float | None = None) ->
         offsets.append(resp.offset * 1000.0)  # 초 → ms
         last_stratum = resp.stratum
     return NtpResult(offset_ms=median(offsets), stratum=last_stratum)
+
+
+def is_plausible_offset(offset_ms: float, bound_ms: float) -> bool:
+    """오프셋 절댓값이 합리적 범위(bound) 이내면 True (FS-052, RISK-009).
+
+    스푸핑/이상치로 비현실적으로 큰 오프셋이 들어오면 기준 시각을 신뢰하지 않는다.
+
+    >>> is_plausible_offset(120.0, 3_600_000.0)
+    True
+    >>> is_plausible_offset(-5_000_000.0, 3_600_000.0)
+    False
+    """
+    return abs(offset_ms) <= bound_ms

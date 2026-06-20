@@ -31,8 +31,8 @@
 
 | ID | 기능 | 출처 URS |
 |----|------|---------|
-| FS-020 | 폴링 워커가 각 장비의 NTP 오프셋을 주기적으로 측정·저장한다. | URS-020 |
-| FS-021 | 대시보드 API가 장비별 최신 오프셋·드리프트·stratum·last_sync를 반환한다. | URS-021 |
+| FS-020 | 폴링이 각 장비 **자신(`asset.hostname`)**에 NTP 질의해 오프셋을 측정·저장한다. 로컬 시계 미신뢰 원칙상 오프셋은 **KRISS 기준으로 보정**한다(장비 vs KRISS = (장비 vs PC) − (KRISS vs PC)). 장비 무응답은 `UNREACHABLE`로, 기준 도달 실패는 미보정(`reference_synced=false`)으로 구분한다. | URS-020 |
+| FS-021 | 대시보드 API가 장비별 최신 오프셋·stratum·last_sync와 상태(`UNKNOWN/UNREACHABLE/STALE/BREACH/OK`)를 반환한다. | URS-021 |
 | FS-022 | 오프셋 절댓값이 표준의 허용 한계를 초과하면 `alert` 레코드를 생성하고 상태를 `BREACH`로 표시한다. | URS-022 |
 | FS-023 | 경고는 생성/해제 타임스탬프를 보존하며 이력 조회 API를 제공한다. | URS-023 |
 

@@ -30,6 +30,16 @@ def _now() -> datetime:
 
 
 @dataclass
+class PollResult:
+    """폴링 1회 결과. 장비 응답 여부와 기준 보정 여부를 함께 전달한다."""
+    asset_id: int
+    reachable: bool
+    sample: OffsetSample | None = None       # 응답 시 보정된 오프셋 샘플
+    reference_synced: bool = True            # KRISS 기준 보정 성공 여부(FS-052)
+    detail: str | None = None                # 무응답/오류 사유
+
+
+@dataclass
 class Monitor:
     """인메모리 모니터링 상태 저장소(현 증분).
 
@@ -37,6 +47,7 @@ class Monitor:
     """
     latest: dict[int, OffsetSample] = field(default_factory=dict)   # asset_id -> 최신 샘플
     alerts: list[Alert] = field(default_factory=list)               # 전체 경고 이력(FS-023)
+    unreachable: dict[int, datetime] = field(default_factory=dict)  # asset_id -> 최근 무응답 시각(FS-020)
     _open: dict[int, Alert] = field(default_factory=dict)           # asset_id -> 미해제 경고
     _alert_seq: int = 0
 
@@ -60,6 +71,7 @@ class Monitor:
             asset_id=asset.id, measured_at=at, offset_ms=offset_ms, stratum=stratum,
         )
         self.latest[asset.id] = sample
+        self.unreachable.pop(asset.id, None)  # 응답 성공 → 무응답 표시 해제
 
         breach = is_offset_breach(offset_ms, standard.max_offset_ms)
         if breach and asset.id not in self._open:
@@ -76,30 +88,69 @@ class Monitor:
             alert.closed_at = at
         return sample
 
+    # --- 무응답 기록 (FS-020, RISK-003) ---
+    def record_unreachable(
+        self, asset: Asset, at: datetime | None = None, detail: str | None = None,
+    ) -> PollResult:
+        """장비가 NTP 질의에 응답하지 않음을 기록한다(UNREACHABLE)."""
+        at = at or _now()
+        self.unreachable[asset.id] = at
+        return PollResult(asset_id=asset.id, reachable=False, detail=detail)
+
     # --- 실측 폴링 (FS-020) ---
     def poll(
         self,
         asset: Asset,
         standard: TimeStandard,
         measure: MeasureFn | None = None,
-    ) -> OffsetSample:
-        """표준의 source_host에 NTP 질의해 샘플을 수집·기록한다.
+        at: datetime | None = None,
+    ) -> PollResult:
+        """장비 자신(asset.hostname)에 NTP 질의해 시각 오차를 수집·기록한다(FS-020).
+
+        로컬 시계 미신뢰(URS-041) 원칙상 오프셋은 KRISS 기준으로 보정한다:
+          장비 vs KRISS = (장비 vs PC) − (KRISS vs PC)
+        이로써 모니터링 PC 자체 시계 오차가 상쇄된다. 장비 무응답은 UNREACHABLE로,
+        기준(KRISS) 도달 실패는 미보정(reference_synced=False)으로 구분한다.
 
         measure 주입으로 테스트에서 네트워크 의존을 분리한다(기본: 실측).
         """
         measure = measure or (lambda host: measure_offset(host))
-        res = measure(standard.source_host)
-        return self.record_sample(
-            asset, standard, offset_ms=res.offset_ms, stratum=res.stratum,
+        at = at or _now()
+
+        # 1) 장비 시각 측정 (PC 대비). 무응답 → UNREACHABLE.
+        try:
+            dev = measure(asset.hostname)
+        except Exception as e:  # 도달 실패/타임아웃
+            return self.record_unreachable(asset, at=at, detail=str(e))
+
+        # 2) 기준(KRISS) 대비 PC 오프셋으로 보정.
+        reference_synced = True
+        try:
+            ref = measure(standard.source_host)
+            offset_vs_ref = dev.offset_ms - ref.offset_ms
+        except Exception:  # 기준 도달 실패 — 미보정 PC 대비값으로 폴백
+            offset_vs_ref = dev.offset_ms
+            reference_synced = False
+
+        sample = self.record_sample(
+            asset, standard, offset_ms=offset_vs_ref, stratum=dev.stratum, at=at,
+        )
+        return PollResult(
+            asset_id=asset.id, reachable=True, sample=sample,
+            reference_synced=reference_synced,
         )
 
     # --- 상태 판정 (FS-021, RISK-003) ---
     def status_of(
         self, asset: Asset, standard: TimeStandard, now: datetime | None = None,
     ) -> str:
-        """대시보드 상태: UNKNOWN / STALE / BREACH / OK (우선순위 순)."""
+        """대시보드 상태: UNKNOWN / UNREACHABLE / STALE / BREACH / OK (우선순위 순)."""
         now = now or _now()
         sample = self.latest.get(asset.id)
+        # 무응답이 최신 샘플보다 나중(또는 샘플 없음)이면 UNREACHABLE (FS-020, RISK-003)
+        unreach_at = self.unreachable.get(asset.id)
+        if unreach_at is not None and (sample is None or unreach_at >= sample.measured_at):
+            return "UNREACHABLE"
         if sample is None:
             return "UNKNOWN"
         age_s = (now - sample.measured_at).total_seconds()

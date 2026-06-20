@@ -7,6 +7,7 @@ from datetime import datetime, timedelta, timezone
 
 from app.models.schemas import Asset, TimeStandard, AlertStatus
 from app.services.monitor import Monitor, NtpResult, STALE_FACTOR
+from app.services.ntp import is_plausible_offset
 
 
 def _std(max_ms=1000.0, poll=60):
@@ -18,12 +19,77 @@ def _asset():
     return Asset(id=1, name="srv-01", hostname="srv-01", gxp_critical=True, standard_id=1)
 
 
-def test_oq020_poll_records_sample():
-    """OQ-020: 폴링 1회 → OffsetSample 생성(측정 함수 주입으로 네트워크 분리)."""
+def test_oq020_poll_per_device_corrected():
+    """OQ-020: 폴링 시 장비(hostname)를 질의하고 KRISS 기준으로 보정해 기록한다.
+
+    장비 vs KRISS = (장비 vs PC) − (KRISS vs PC) = 12.5 − 2.0 = 10.5.
+    로컬 시계 미신뢰(URS-041): PC 자체 오차가 상쇄됨.
+    """
     m, a, s = Monitor(), _asset(), _std()
-    sample = m.poll(a, s, measure=lambda host: NtpResult(offset_ms=12.5, stratum=3))
-    assert sample.offset_ms == 12.5 and sample.stratum == 3
-    assert m.latest[a.id].offset_ms == 12.5
+
+    def fake(host):
+        return (NtpResult(offset_ms=12.5, stratum=3) if host == a.hostname
+                else NtpResult(offset_ms=2.0, stratum=2))
+
+    res = m.poll(a, s, measure=fake)
+    assert res.reachable and res.reference_synced
+    assert res.sample.offset_ms == 10.5 and res.sample.stratum == 3
+    assert m.latest[a.id].offset_ms == 10.5
+
+
+def test_oq020_unreachable_when_device_no_response():
+    """장비가 NTP에 무응답 → reachable=False, 샘플 없음, 상태 UNREACHABLE."""
+    m, a, s = Monitor(), _asset(), _std()
+
+    def fake(host):
+        if host == a.hostname:
+            raise TimeoutError("no response")
+        return NtpResult(offset_ms=2.0, stratum=2)
+
+    res = m.poll(a, s, measure=fake)
+    assert res.reachable is False and res.sample is None
+    assert m.status_of(a, s) == "UNREACHABLE"
+
+
+def test_oq020_reference_unreachable_marks_unsynced():
+    """기준(KRISS) 도달 실패 → 미보정 PC 대비값으로 폴백, reference_synced=False."""
+    m, a, s = Monitor(), _asset(), _std()
+
+    def fake(host):
+        if host == a.hostname:
+            return NtpResult(offset_ms=12.5, stratum=3)
+        raise TimeoutError("kriss unreachable")
+
+    res = m.poll(a, s, measure=fake)
+    assert res.reachable and res.reference_synced is False
+    assert res.sample.offset_ms == 12.5  # 미보정 값
+
+
+def test_unreachable_then_recovered():
+    """무응답 후 응답 복귀 → UNREACHABLE 해제, 정상 상태로 복귀."""
+    m, a, s = Monitor(), _asset(), _std()
+    state = {"down": True}
+
+    def fake(host):
+        if host == a.hostname:
+            if state["down"]:
+                raise TimeoutError("no response")
+            return NtpResult(offset_ms=10.0, stratum=3)
+        return NtpResult(offset_ms=2.0, stratum=2)
+
+    m.poll(a, s, measure=fake)
+    assert m.status_of(a, s) == "UNREACHABLE"
+    state["down"] = False
+    res = m.poll(a, s, measure=fake)
+    assert res.reachable and m.status_of(a, s) == "OK"
+    assert a.id not in m.unreachable
+
+
+def test_fs052_offset_sanity_bound():
+    """FS-052/RISK-009: 비현실적으로 큰 오프셋은 미신뢰(스푸핑 완화)."""
+    assert is_plausible_offset(120.0, 3_600_000.0) is True
+    assert is_plausible_offset(3_600_000.0, 3_600_000.0) is True   # 경계 = 합격
+    assert is_plausible_offset(-5_000_000.0, 3_600_000.0) is False
 
 
 def test_oq022a_within_limit_no_alert():

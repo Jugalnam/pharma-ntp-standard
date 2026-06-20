@@ -14,7 +14,7 @@ from app.models.schemas import (
     OffsetSample, Alert,
 )
 from app.services.monitor import Monitor
-from app.services.ntp import measure_offset
+from app.services.ntp import measure_offset, is_plausible_offset
 
 router = APIRouter(prefix="/api")
 
@@ -52,6 +52,16 @@ def reference_time():
     try:
         # 폴링과 동일한 다중 샘플로 단발 UDP 유실에 견고하게(RISK-004).
         res = measure_offset(host, samples=3)
+        # 비현실적으로 큰 오프셋은 스푸핑/이상치로 보고 미신뢰(FS-052, RISK-009).
+        if not is_plausible_offset(res.offset_ms, settings.ntp_sanity_bound_ms):
+            return {
+                "reference_utc": now.isoformat(),
+                "offset_ms": res.offset_ms,
+                "stratum": res.stratum,
+                "source_host": host,
+                "synced": False,
+                "detail": "offset exceeds sanity bound (FS-052)",
+            }
         ref = now + timedelta(milliseconds=res.offset_ms)
         return {
             "reference_utc": ref.isoformat(),
@@ -110,19 +120,26 @@ def create_asset(body: AssetIn):
 
 
 # --- 모니터링 (FS-020/021/022/023) ---
-@router.post("/assets/{aid}/poll", response_model=OffsetSample)
+@router.post("/assets/{aid}/poll")
 def poll_asset(aid: int):
-    """장비의 표준 source_host에 NTP 질의해 오프셋을 1회 수집한다(FS-020)."""
+    """장비 자신(asset.hostname)에 NTP 질의해 KRISS 기준 오차를 1회 수집한다(FS-020).
+
+    장비 무응답 시 예외 대신 `reachable=false`(UNREACHABLE)로 반환한다.
+    """
     if aid not in _assets:
         raise HTTPException(404, "asset not found")
     asset = _assets[aid]
     std = _standards.get(asset.standard_id) if asset.standard_id else None
     if std is None:
         raise HTTPException(409, "asset has no time standard assigned")
-    try:
-        return monitor.poll(asset, std)
-    except Exception as e:  # NTP 도달 실패 등
-        raise HTTPException(502, f"NTP measurement failed: {e}")
+    result = monitor.poll(asset, std)
+    return {
+        "asset_id": result.asset_id,
+        "reachable": result.reachable,
+        "reference_synced": result.reference_synced,
+        "sample": result.sample,
+        "detail": result.detail,
+    }
 
 
 @router.get("/dashboard")
