@@ -183,6 +183,18 @@ th {
 .add-form input {
   flex: 1 1 12rem;
 }
+.add-form .field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 0.78rem;
+  color: #666;
+  flex: 0 0 auto;
+}
+.add-form .field input {
+  flex: 0 0 auto;
+  width: 8rem;
+}
 .add-form button {
   padding: 0.45rem 1.1rem;
   border: none;

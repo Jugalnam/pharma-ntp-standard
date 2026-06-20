@@ -95,8 +95,9 @@ class Monitor:
         if breach and asset.id not in self._open:
             self._alert_seq += 1
             alert = Alert(
-                id=self._alert_seq, asset_id=asset.id, opened_at=at,
-                offset_ms=offset_ms, status=AlertStatus.OPEN,
+                id=self._alert_seq, asset_id=asset.id, asset_name=asset.name,
+                opened_at=at, offset_ms=offset_ms, limit_ms=standard.max_offset_ms,
+                status=AlertStatus.OPEN,
             )
             self._open[asset.id] = alert
             self.alerts.append(alert)

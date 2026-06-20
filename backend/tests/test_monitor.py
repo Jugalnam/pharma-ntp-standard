@@ -101,6 +101,15 @@ def test_fs024_poll_records_last_attempt():
     assert m.last_attempt[a.id] == t0
 
 
+def test_breach_log_has_name_and_limit():
+    """한계초과 로그(Alert)에 장비명·한계값이 기록된다(FS-022/023)."""
+    m, a, s = Monitor(), _asset(), _std(max_ms=1000.0)
+    m.record_sample(a, s, offset_ms=1500.0)
+    assert len(m.alerts) == 1
+    al = m.alerts[0]
+    assert al.asset_name == a.name and al.limit_ms == 1000.0
+
+
 def test_dashboard_row_includes_hostname():
     """대시보드 행에 장비 IP/호스트가 포함된다(프론트 IP 열)."""
     m, a, s = Monitor(), _asset(), _std()

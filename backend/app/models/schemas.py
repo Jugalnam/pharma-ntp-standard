@@ -30,8 +30,8 @@ class AlertStatus(str, Enum):
 class TimeStandardIn(BaseModel):
     name: str
     source_host: str = "time.kriss.re.kr"
-    max_offset_ms: float = 1000.0
-    poll_interval_s: int = 60
+    max_offset_ms: float = Field(default=1000.0, ge=0)
+    poll_interval_s: int = Field(default=60, ge=1)  # 0/음수 폴링 주기 방지
 
 
 class TimeStandard(TimeStandardIn):
@@ -59,13 +59,15 @@ class OffsetSample(BaseModel):
     stratum: int | None = None
 
 
-# --- Alert (FS-022/023) ---
+# --- Alert / 한계초과 로그 (FS-022/023) ---
 class Alert(BaseModel):
     id: int
     asset_id: int
+    asset_name: str = ""          # 로그 가독성(장비 삭제 후에도 보존)
     opened_at: datetime
     closed_at: datetime | None = None
     offset_ms: float
+    limit_ms: float | None = None  # 초과 당시 허용 한계
     status: AlertStatus = AlertStatus.OPEN
 
 

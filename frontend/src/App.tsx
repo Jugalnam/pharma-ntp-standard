@@ -16,7 +16,23 @@ type Dashboard = {
   assets: DashboardRow[]
 }
 
-type Standard = { id: number; name: string }
+type Standard = {
+  id: number
+  name: string
+  source_host: string
+  max_offset_ms: number
+  poll_interval_s: number
+}
+type Alert = {
+  id: number
+  asset_id: number
+  asset_name: string
+  opened_at: string
+  closed_at: string | null
+  offset_ms: number
+  limit_ms: number | null
+  status: string
+}
 type RefTime = { stratum: number | null; synced: boolean; source: string }
 
 const clockFmt = new Intl.DateTimeFormat('ko-KR', {
@@ -48,6 +64,17 @@ const fmtOffset = (ms: number | null) => {
 const fmtLimit = (ms: number) => `${(ms / 1000).toFixed(1)}s`
 const fmtSync = (iso: string | null) => (iso ? clockFmt.format(new Date(iso)) : '—')
 
+const dtFmt = new Intl.DateTimeFormat('ko-KR', {
+  timeZone: 'Asia/Seoul',
+  month: '2-digit',
+  day: '2-digit',
+  hour: '2-digit',
+  minute: '2-digit',
+  second: '2-digit',
+  hour12: false,
+})
+const fmtDateTime = (iso: string | null) => (iso ? dtFmt.format(new Date(iso)) : '—')
+
 function App() {
   const [health, setHealth] = useState<string>('확인 중…')
   const [referenceSource, setReferenceSource] = useState<string>('')
@@ -60,6 +87,16 @@ function App() {
   const [adding, setAdding] = useState(false)
   const [addError, setAddError] = useState<string | null>(null)
   const [addOk, setAddOk] = useState<string | null>(null)
+
+  // 한계 초과 로그(Alert)
+  const [alerts, setAlerts] = useState<Alert[]>([])
+
+  // 동기화 설정(표준 편집)
+  const [settingsStd, setSettingsStd] = useState<Standard | null>(null)
+  const [intervalInput, setIntervalInput] = useState('')
+  const [limitInput, setLimitInput] = useState('')
+  const [savingSettings, setSavingSettings] = useState(false)
+  const [settingsMsg, setSettingsMsg] = useState<string | null>(null)
 
   // 대형 시계: /api/time(KRISS 보정 기준시각)을 앵커로 받아 로컬에서 매초 틱.
   const [refSkew, setRefSkew] = useState<number | null>(null)
@@ -78,6 +115,15 @@ function App() {
     [],
   )
 
+  const loadAlerts = useCallback(
+    () =>
+      fetch('/api/alerts')
+        .then((r) => r.json())
+        .then((d: Alert[]) => setAlerts(d))
+        .catch(() => {}),
+    [],
+  )
+
   useEffect(() => {
     fetch('/api/health')
       .then((r) => r.json())
@@ -91,17 +137,26 @@ function App() {
       .then((r) => r.json())
       .then((d: Standard[]) => {
         setStandards(d)
-        if (d.length) setForm((f) => (f.standardId ? f : { ...f, standardId: String(d[0].id) }))
+        if (d.length) {
+          setForm((f) => (f.standardId ? f : { ...f, standardId: String(d[0].id) }))
+          setSettingsStd(d[0])
+          setIntervalInput(String(d[0].poll_interval_s))
+          setLimitInput(String(d[0].max_offset_ms / 1000))
+        }
       })
       .catch(() => {})
   }, [])
 
-  // 대시보드 자동 갱신: 마운트 시 1회 + 5초마다(백엔드 스케줄러가 폴링한 최신값 반영)
+  // 대시보드 + 한계초과 로그 자동 갱신: 마운트 시 1회 + 5초마다
   useEffect(() => {
-    loadDashboard()
-    const id = setInterval(loadDashboard, DASHBOARD_REFRESH_MS)
+    const load = () => {
+      loadDashboard()
+      loadAlerts()
+    }
+    load()
+    const id = setInterval(load, DASHBOARD_REFRESH_MS)
     return () => clearInterval(id)
-  }, [loadDashboard])
+  }, [loadDashboard, loadAlerts])
 
   // 기준 시각 앵커 동기화: 즉시 1회 + 5분마다 재동기(드리프트 보정)
   useEffect(() => {
@@ -167,6 +222,49 @@ function App() {
     if (!window.confirm(`'${name}' 장비를 등록 해제할까요?`)) return
     await fetch(`/api/assets/${id}`, { method: 'DELETE' }).catch(() => {})
     await loadDashboard()
+  }
+
+  const saveSettings = async () => {
+    if (!settingsStd) return
+    const interval = Number(intervalInput)
+    const limitSec = Number(limitInput)
+    if (!Number.isFinite(interval) || interval < 1) {
+      setSettingsMsg('폴링 주기는 1초 이상이어야 합니다.')
+      return
+    }
+    if (!Number.isFinite(limitSec) || limitSec < 0) {
+      setSettingsMsg('허용 한계는 0초 이상이어야 합니다.')
+      return
+    }
+    setSavingSettings(true)
+    setSettingsMsg(null)
+    try {
+      const res = await fetch(`/api/standards/${settingsStd.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: settingsStd.name,
+          source_host: settingsStd.source_host,
+          max_offset_ms: Math.round(limitSec * 1000),
+          poll_interval_s: Math.round(interval),
+        }),
+      })
+      if (res.ok) {
+        const updated: Standard = await res.json()
+        setSettingsStd(updated)
+        setStandards((arr) => arr.map((s) => (s.id === updated.id ? updated : s)))
+        setSettingsMsg(
+          `저장됨 — ${updated.poll_interval_s}초마다 측정, 허용 한계 ${(updated.max_offset_ms / 1000).toFixed(1)}초`,
+        )
+        await loadDashboard()
+      } else {
+        setSettingsMsg(`저장 실패 (HTTP ${res.status})`)
+      }
+    } catch {
+      setSettingsMsg('백엔드에 연결할 수 없습니다.')
+    } finally {
+      setSavingSettings(false)
+    }
   }
 
   const canSubmit = form.name.trim() && form.hostname.trim() && form.standardId && !adding
@@ -239,6 +337,47 @@ function App() {
       </section>
 
       {error && <div className="error">{error}</div>}
+
+      <section>
+        <h2>동기화 설정</h2>
+        {settingsStd ? (
+          <>
+            <div className="add-form">
+              <label className="field">
+                폴링 주기(초)
+                <input
+                  type="number"
+                  min={1}
+                  value={intervalInput}
+                  onChange={(e) => setIntervalInput(e.target.value)}
+                />
+              </label>
+              <label className="field">
+                허용 한계(초)
+                <input
+                  type="number"
+                  min={0}
+                  step="0.1"
+                  value={limitInput}
+                  onChange={(e) => setLimitInput(e.target.value)}
+                />
+              </label>
+              <button onClick={saveSettings} disabled={savingSettings}>
+                {savingSettings ? '저장 중…' : '저장'}
+              </button>
+            </div>
+            <p className="form-hint">
+              표준 '<strong>{settingsStd.name}</strong>'에 적용 · 현재{' '}
+              <strong>{settingsStd.poll_interval_s}초</strong>마다 (
+              {(settingsStd.poll_interval_s / 60).toFixed(1)}분) 측정, 허용 한계{' '}
+              <strong>{(settingsStd.max_offset_ms / 1000).toFixed(1)}초</strong>
+            </p>
+            {settingsMsg && <div className="ok-msg">{settingsMsg}</div>}
+          </>
+        ) : (
+          <p className="empty">표준이 없습니다.</p>
+        )}
+      </section>
 
       <section>
         <h2>장비 등록</h2>
@@ -324,6 +463,47 @@ function App() {
                     >
                       삭제
                     </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </section>
+
+      <section>
+        <div className="section-head">
+          <h2>허용 한계 초과 로그</h2>
+          <span className="refresh-note">{alerts.length}건</span>
+        </div>
+        {alerts.length === 0 ? (
+          <p className="empty">한계를 초과한 기록이 없습니다.</p>
+        ) : (
+          <table>
+            <thead>
+              <tr>
+                <th>장비</th>
+                <th className="num">측정 오프셋</th>
+                <th className="num">허용 한계</th>
+                <th className="num">발생 시각</th>
+                <th className="num">해제 시각</th>
+                <th className="center">상태</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[...alerts].reverse().map((al) => (
+                <tr key={al.id}>
+                  <td>{al.asset_name || `#${al.asset_id}`}</td>
+                  <td className="num">{fmtOffset(al.offset_ms)}</td>
+                  <td className="num">{al.limit_ms != null ? fmtLimit(al.limit_ms) : '—'}</td>
+                  <td className="num">{fmtDateTime(al.opened_at)}</td>
+                  <td className="num">{fmtDateTime(al.closed_at)}</td>
+                  <td className="center">
+                    <span
+                      className={`badge badge--${al.status === 'OPEN' ? 'breach' : 'unreachable'}`}
+                    >
+                      {al.status === 'OPEN' ? '진행 중' : '해제됨'}
+                    </span>
                   </td>
                 </tr>
               ))}

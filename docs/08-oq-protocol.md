@@ -27,10 +27,10 @@
 | OQ-021 | 대시보드 (FS-021) | `/api/dashboard` 호출 | 장비별 최신 오프셋·stratum·last_sync 반환 | ✅ PASS — offset/stratum/last_sync/status=OK 반환 |
 | **OQ-022a** | 한계 **이내** (FS-022, RISK-001) | 오프셋 = 한계−1ms 주입 | 경고 **미발생**, 상태 OK | ✅ PASS — `test_oq022a_within_limit_no_alert` |
 | **OQ-022b** | 한계 **초과** (FS-022, RISK-001) | 오프셋 = 한계+1ms 주입 | 경고 **발생**, 상태 BREACH | ✅ PASS — `test_oq022b_over_limit_breach` |
-| OQ-023 | 경고 해제·이력 (FS-023) | 오프셋 복귀 | 경고 CLOSED, 이력 보존 | ✅ PASS — `test_oq023_alert_close_and_history` |
+| OQ-023 | 한계 초과 로그·해제 (FS-023) | 오프셋 초과→복귀 | 로그에 장비명·오프셋·한계 기록, OPEN→CLOSED 전이, 이력 보존 | ✅ PASS — `test_oq023_*`·`test_breach_log_has_name_and_limit`; 라이브: 한계 5ms에서 3건 기록(OPEN 2·CLOSED 1), 화면 로그 표시 |
 | OQ-030 | 산출물 생성 (FS-030) | 산출물 생성 | 저장·조회됨 | ✅ PASS — `test_deliverable_*` |
 | OQ-031 | 상태 전이 규칙 (FS-031, RISK-005) | Draft→Approved 직접 전이 시도 | 거부(Reviewed 거쳐야 함) | ✅ PASS — `test_deliverable_invalid_transition_rejected`(409) |
-| OQ-040 | 감사 추적 (FS-040, RISK-006) | 표준 변경 | AuditEntry append, 수정 불가 | ❌ DEFERRED — 감사 추적 미구현(일탈 #3, 후속 증분) |
+| OQ-040 | 감사 추적 (FS-040, RISK-006) | — | — | ⛔ 범위 제외(2026-06-20) — 전체 감사 추적 미채택, [FS-023] 한계 초과 로그(OQ-023)로 핵심 이벤트 기록 대체 |
 | OQ-041 | 기준 시각 표시 (FS-041) | `GET /api/time` 호출, 대시보드 대형 시계 확인 | `synced=true`·`reference_utc`·stratum 유효(편차 ≤ 표준 한계). NTP 불가 시 `synced=false` 폴백 표시 | ✅ PASS — 라이브 stratum 3, offset +0.19ms, `reference_utc` 반환; 단일 샘플 실패 시 `synced=false` 폴백 동작 확인 |
 | OQ-050 | Egress 제한 (FS-050, RISK-007) | 모니터링 PC에서 KRISS 외 임의 외부 주소로 통신 시도(예: 웹/타 포트) 및 KRISS UDP 123 질의 | KRISS:123/udp만 성공, 그 외 외부 통신·인바운드 차단 | ⏳ PLANNED — 현장 방화벽 구성 후 실행(배포 환경 의존) |
 | OQ-051 | 읽기 전용 동작 (FS-051, RISK-011) | 폴링 실행 전후 대상 장비의 시각·NTP 설정 비교 | 장비 시각·설정 무변경(질의만 발생) | ⏳ PLANNED — 현장 장비 대상 실행 |
@@ -54,7 +54,7 @@ OQ-020/021에서 수집된 시스템 기준 시각을 **UTCk가 표시하는 KRI
 | 일탈 # | 케이스 | 내용 | 조치 | 상태 |
 |--------|--------|------|------|------|
 | 2 | OQ-002 | 표준 수정 시 version은 증가하나 변경 이력(사유/승인) 레코드 미생성 | 감사 추적(FS-040) 구현 시 변경 이력 연동 | Open(계획됨) |
-| 3 | OQ-040 | AuditEntry(append-only 감사 추적) 미구현 → 변경 추적·무결성 검증 불가 | 후속 증분에서 FS-040 구현 후 OQ-040 실행 | Open(계획됨) |
+| 3 | OQ-040 | 전체 감사 추적 미구현 | **범위 제외 결정(2026-06-20)** — 한계 초과 로그(FS-023/OQ-023)로 핵심 이벤트 기록 대체. 실 규제 적용 시 Part 11 별도 검토 | Closed(범위 제외) |
 
 > 두 일탈 모두 [URS](01-user-requirements.md) §7 주석 및 [DS](03-design-spec.md) 설계에서 "후속 반복"으로 명시된 범위로, 본 증분의 합격을 막지 않는다(중대 일탈 아님).
 
