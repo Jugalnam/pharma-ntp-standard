@@ -3,7 +3,7 @@
 초기 골격: 인메모리 저장소 기반. 표준/장비/대시보드/산출물 CRUD 스텁을 제공한다.
 후속 반복에서 영속 저장소(SQLAlchemy)와 감사 추적(FS-040)을 연결한다.
 """
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from fastapi import APIRouter, HTTPException
 
 from app.config import settings
@@ -14,6 +14,7 @@ from app.models.schemas import (
     OffsetSample, Alert,
 )
 from app.services.monitor import Monitor
+from app.services.ntp import measure_offset
 
 router = APIRouter(prefix="/api")
 
@@ -36,6 +37,38 @@ def _next(key: str) -> int:
 def health():
     """IQ-005: 헬스체크."""
     return {"status": "ok", "reference_source": settings.default_ntp_host}
+
+
+@router.get("/time")
+def reference_time():
+    """KRISS 기준 시각(표준시) 1회 측정 — 프론트 대형 시계용(FS-041).
+
+    server UTC에 KRISS 오프셋을 보정해 '신뢰 시간'을 반환한다(로컬 시계 미신뢰 원칙).
+    NTP 도달 실패 시 synced=false로 server 시각을 폴백 제공한다(RISK-003 가시화).
+    프론트는 이 값을 앵커로 매초 로컬 틱하고 주기적으로 재동기한다.
+    """
+    now = datetime.now(timezone.utc)
+    host = settings.default_ntp_host
+    try:
+        # 폴링과 동일한 다중 샘플로 단발 UDP 유실에 견고하게(RISK-004).
+        res = measure_offset(host, samples=3)
+        ref = now + timedelta(milliseconds=res.offset_ms)
+        return {
+            "reference_utc": ref.isoformat(),
+            "offset_ms": res.offset_ms,
+            "stratum": res.stratum,
+            "source_host": host,
+            "synced": True,
+        }
+    except Exception as e:  # NTP 도달 실패 — server 시각 폴백
+        return {
+            "reference_utc": now.isoformat(),
+            "offset_ms": None,
+            "stratum": None,
+            "source_host": host,
+            "synced": False,
+            "detail": str(e),
+        }
 
 
 # --- 표준 (FS-001/002) ---

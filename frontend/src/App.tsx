@@ -16,11 +16,27 @@ type Dashboard = {
   assets: DashboardRow[]
 }
 
+type RefTime = { stratum: number | null; synced: boolean; source: string }
+
+const clockFmt = new Intl.DateTimeFormat('ko-KR', {
+  timeZone: 'Asia/Seoul',
+  hour: '2-digit',
+  minute: '2-digit',
+  second: '2-digit',
+  hour12: false,
+})
+
 function App() {
   const [health, setHealth] = useState<string>('확인 중…')
   const [referenceSource, setReferenceSource] = useState<string>('')
   const [dashboard, setDashboard] = useState<Dashboard | null>(null)
   const [error, setError] = useState<string | null>(null)
+
+  // 대형 시계: /api/time(KRISS 보정 기준시각)을 앵커로 받아 로컬에서 매초 틱.
+  // skew = (서버가 준 기준 UTC ms) − (수신 시점 브라우저 ms). 매초 now+skew를 표시.
+  const [refSkew, setRefSkew] = useState<number | null>(null)
+  const [refMeta, setRefMeta] = useState<RefTime | null>(null)
+  const [nowMs, setNowMs] = useState<number>(() => Date.now())
 
   useEffect(() => {
     fetch('/api/health')
@@ -37,6 +53,35 @@ function App() {
       .catch(() => {})
   }, [])
 
+  // 기준 시각 앵커 동기화: 즉시 1회 + 60초마다 재동기(드리프트 보정)
+  useEffect(() => {
+    let cancelled = false
+    const sync = () =>
+      fetch('/api/time')
+        .then((r) => r.json())
+        .then((d) => {
+          if (cancelled) return
+          setRefSkew(Date.parse(d.reference_utc) - Date.now())
+          setRefMeta({ stratum: d.stratum, synced: d.synced, source: d.source_host })
+        })
+        .catch(() => {})
+    sync()
+    const id = setInterval(sync, 300_000) // 5분마다 재동기(그 사이 로컬 틱). KRISS 부하 최소화.
+    return () => {
+      cancelled = true
+      clearInterval(id)
+    }
+  }, [])
+
+  // 표시용 로컬 틱(250ms마다 갱신 → 초 단위 매끄럽게 전환)
+  useEffect(() => {
+    const id = setInterval(() => setNowMs(Date.now()), 250)
+    return () => clearInterval(id)
+  }, [])
+
+  const clockText =
+    refSkew !== null ? clockFmt.format(new Date(nowMs + refSkew)) : '--:--:--'
+
   return (
     <div className="app">
       <header>
@@ -50,6 +95,20 @@ function App() {
           <span className={health === 'ok' ? 'ok' : 'warn'}>{health}</span>
         </p>
       </header>
+
+      <section className="clock-panel">
+        <div className="clock-label">KRISS 표준시 · UTC+9 (Asia/Seoul)</div>
+        <div className={`clock${refMeta && !refMeta.synced ? ' clock--stale' : ''}`}>
+          {clockText}
+        </div>
+        <div className="clock-meta">
+          {refMeta === null
+            ? '기준 시각 동기화 중…'
+            : refMeta.synced
+              ? `${refMeta.source} · stratum ${refMeta.stratum ?? '—'} · 동기 양호`
+              : `${refMeta.source} 도달 실패 — 서버 시각 표시(미검증)`}
+        </div>
+      </section>
 
       {error && <div className="error">{error}</div>}
 

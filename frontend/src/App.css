@@ -33,6 +33,52 @@ header h1 {
   font-weight: 600;
 }
 
+.clock-panel {
+  margin: 1.25rem 0 1.75rem;
+  padding: 1.1rem 1.25rem;
+  border: 1px solid #e3e3e3;
+  border-radius: 10px;
+  background: #fafafa;
+  text-align: center;
+}
+
+.clock-label {
+  color: #666;
+  font-size: 0.82rem;
+  letter-spacing: 0.02em;
+}
+
+.clock {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+  font-size: 4rem;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: 0.04em;
+  color: #1a7f37;
+  margin: 0.2rem 0;
+}
+
+.clock--stale {
+  color: #b35900;
+}
+
+.clock-meta {
+  color: #777;
+  font-size: 0.8rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  .clock-panel {
+    background: #1c1c1c;
+    border-color: #333;
+  }
+  .clock-label,
+  .clock-meta {
+    color: #999;
+  }
+}
+
 .error {
   background: #fff0f0;
   border: 1px solid #e0b4b4;

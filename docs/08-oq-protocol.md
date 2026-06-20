@@ -27,6 +27,7 @@
 | OQ-030 | 산출물 생성 (FS-030) | 산출물 생성 | 저장·조회됨 | ✅ PASS — `test_deliverable_*` |
 | OQ-031 | 상태 전이 규칙 (FS-031, RISK-005) | Draft→Approved 직접 전이 시도 | 거부(Reviewed 거쳐야 함) | ✅ PASS — `test_deliverable_invalid_transition_rejected`(409) |
 | OQ-040 | 감사 추적 (FS-040, RISK-006) | 표준 변경 | AuditEntry append, 수정 불가 | ❌ DEFERRED — 감사 추적 미구현(일탈 #3, 후속 증분) |
+| OQ-041 | 기준 시각 표시 (FS-041) | `GET /api/time` 호출, 대시보드 대형 시계 확인 | `synced=true`·`reference_utc`·stratum 유효(편차 ≤ 표준 한계). NTP 불가 시 `synced=false` 폴백 표시 | ✅ PASS — 라이브 stratum 3, offset +0.19ms, `reference_utc` 반환; 단일 샘플 실패 시 `synced=false` 폴백 동작 확인 |
 
 > 추가 검증: RISK-003(폴링 중단) 완화로 last_sync 노후 시 상태 `STALE` 반환 — `test_risk003_stale_detection` PASS. 백엔드 스위트 `pytest` 17건 전체 통과.
 
@@ -37,7 +38,7 @@ OQ-020/021에서 수집된 시스템 기준 시각을 **UTCk가 표시하는 KRI
 ## 4. 합격 기준
 
 모든 OQ 케이스 통과(High 위험 케이스 OQ-022a/b는 필수). 일탈은 기록·평가.
-→ **결과: High 위험 OQ-022a/b·OQ-023(RISK-001) 전부 PASS. 기능 케이스 9/12 PASS, 1 PARTIAL(OQ-002), 2 미충족(OQ-040 및 OQ-002 이력)은 감사 추적 미구현에 따른 계획된 유보. 핵심 모니터링 기능은 합격.**
+→ **결과: High 위험 OQ-022a/b·OQ-023(RISK-001) 전부 PASS. 기능 케이스 10/13 PASS, 1 PARTIAL(OQ-002), 2 미충족(OQ-040 및 OQ-002 이력)은 감사 추적 미구현에 따른 계획된 유보. 핵심 모니터링 기능 및 기준 시각 표시(OQ-041)는 합격.**
 
 ## 5. 일탈
 
