@@ -58,9 +58,11 @@ class PollResult:
 
 @dataclass
 class Monitor:
-    """인메모리 모니터링 상태 저장소(현 증분).
+    """실시간 모니터링 상태 엔진(인메모리).
 
-    후속 증분에서 SQLAlchemy 영속 저장소로 대체한다.
+    오프셋·도달성·last_attempt 등 실시간 측정값은 폴링으로 재생성되므로 인메모리로
+    둔다. 한계초과 로그(alerts)는 routes 계층에서 DB와 write-through하며, 재시작 시
+    [hydrate]로 복원한다(FS-023).
     """
     latest: dict[int, OffsetSample] = field(default_factory=dict)   # asset_id -> 최신 샘플
     alerts: list[Alert] = field(default_factory=list)               # 전체 경고 이력(FS-023)
@@ -68,6 +70,17 @@ class Monitor:
     last_attempt: dict[int, datetime] = field(default_factory=dict) # asset_id -> 최근 폴링 시도 시각(FS-024)
     _open: dict[int, Alert] = field(default_factory=dict)           # asset_id -> 미해제 경고
     _alert_seq: int = 0
+
+    # --- 영속 저장소에서 경고 상태 복원 (FS-023, 재시작 후) ---
+    def hydrate(self, alerts: list[Alert]) -> None:
+        """DB에 보존된 한계초과 로그로 인메모리 경고 상태를 복원한다.
+
+        실시간 측정값(latest/unreachable/last_attempt)은 폴링으로 재생성되므로
+        복원하지 않는다. 미해제(OPEN) 경고는 중복 생성 방지를 위해 _open에 적재한다.
+        """
+        self.alerts = list(alerts)
+        self._open = {a.asset_id: a for a in alerts if a.status == AlertStatus.OPEN}
+        self._alert_seq = max((a.id for a in alerts), default=0)
 
     # --- 샘플 기록 + 경고 판정 (FS-022/023, RISK-001) ---
     def record_sample(

@@ -21,7 +21,7 @@
 - **Frontend**: React + Vite + TypeScript. 라우팅, 대시보드, 표준/장비/검증 관리 화면.
 - **Backend**: FastAPI. 계층 — `api`(라우터) / `services`(도메인 로직) / `models`(ORM·스키마).
 - **폴링 워커**: 백그라운드 태스크가 장비별 NTP 오프셋을 측정(초기: `ntplib`).
-- **DB**: 개발 SQLite, 운영 PostgreSQL. SQLAlchemy ORM으로 추상화.
+- **DB**: SQLAlchemy ORM. 개발 SQLite(`pharma_ntp.sqlite3`), 운영 PostgreSQL(`NTP_DATABASE_URL`만 변경). **영속 대상: 표준·장비·산출물·한계초과 로그.** 실시간 측정값(오프셋·도달성·last_attempt)은 폴링으로 재생성되므로 모니터링 엔진 인메모리에 두고, 한계초과 로그는 DB와 write-through하며 기동 시 복원한다.
 
 ## 3. 데이터 모델 (DS-010)
 
@@ -29,10 +29,12 @@
 |--------|----------|------|
 | `TimeStandard` | id, name, source_host(기본 `time.kriss.re.kr`), max_offset_ms, poll_interval_s, version | FS-001/002, KRISS UTC(k) 기준 |
 | `Asset` | id, name, hostname, gxp_critical, standard_id | FS-010~012 |
-| `OffsetSample` | id, asset_id, measured_at, offset_ms, stratum | FS-020/021 |
-| `Alert` | id, asset_id, opened_at, closed_at, offset_ms, status | FS-022/023 |
-| `Deliverable` | id, type(IQ/OQ/PQ), title, status, requirement_tags | FS-030~032 |
-| `AuditEntry` | id, entity, entity_id, action, actor, reason, at | append-only, FS-040 |
+| `OffsetSample` | asset_id, measured_at, offset_ms, stratum | FS-020/021, **인메모리**(폴링 재생성) |
+| `Alert` | id, asset_id, asset_name, opened_at, closed_at, offset_ms, limit_ms, status | FS-022/023, **영속**(한계초과 로그) |
+| `Deliverable` | id, type(IQ/OQ/PQ), title, status, requirement_tags | FS-030~032, 영속 |
+| ~~`AuditEntry`~~ | — | **범위 제외(2026-06-20)** — Alert(한계초과 로그)로 핵심 이벤트 기록 대체 |
+
+> 영속 테이블(`standards`/`assets`/`deliverables`/`alerts`)은 SQLAlchemy ORM([backend/app/models/orm.py])으로 정의되며, Pydantic 도메인 모델과 `from_attributes`로 변환된다.
 
 ## 4. API 설계 (DS-020)
 

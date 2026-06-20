@@ -1,11 +1,12 @@
 """도메인 스키마 (DS-010 데이터 모델).
 
-초기 골격은 Pydantic 모델 + 인메모리 저장소를 사용한다.
-후속 반복에서 SQLAlchemy ORM(PostgreSQL)으로 전환한다.
+Pydantic 도메인 모델. 영속 대상(표준/장비/산출물/한계초과 로그)은 SQLAlchemy
+ORM([models/orm])과 1:1 대응하며 `from_attributes`로 변환한다. 실시간 측정값은
+모니터링 엔진의 인메모리 상태로 유지한다(폴링으로 재생성).
 """
 from datetime import datetime
 from enum import Enum
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class DeliverableType(str, Enum):
@@ -35,6 +36,7 @@ class TimeStandardIn(BaseModel):
 
 
 class TimeStandard(TimeStandardIn):
+    model_config = ConfigDict(from_attributes=True)  # ORM → Pydantic 변환
     id: int
     version: int = 1
 
@@ -48,6 +50,7 @@ class AssetIn(BaseModel):
 
 
 class Asset(AssetIn):
+    model_config = ConfigDict(from_attributes=True)
     id: int
 
 
@@ -61,6 +64,7 @@ class OffsetSample(BaseModel):
 
 # --- Alert / 한계초과 로그 (FS-022/023) ---
 class Alert(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
     id: int
     asset_id: int
     asset_name: str = ""          # 로그 가독성(장비 삭제 후에도 보존)
@@ -79,5 +83,6 @@ class DeliverableIn(BaseModel):
 
 
 class Deliverable(DeliverableIn):
+    model_config = ConfigDict(from_attributes=True)
     id: int
     status: DeliverableStatus = DeliverableStatus.DRAFT

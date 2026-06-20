@@ -12,13 +12,16 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.routes import router, run_scheduler
+from app.api.routes import router, run_scheduler, hydrate_from_db
 from app.config import settings
+from app.db import init_db
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """앱 수명주기: 주기적 폴링 스케줄러(FS-024)를 기동·정리한다."""
+    """앱 수명주기: DB 초기화·경고 로그 복원 후 폴링 스케줄러(FS-024)를 기동·정리한다."""
+    init_db()  # 테이블 생성(존재 시 무시)
+    hydrate_from_db()  # 영속 한계초과 로그로 모니터 상태 복원(재시작 후)
     task = asyncio.create_task(run_scheduler()) if settings.scheduler_enabled else None
     try:
         yield

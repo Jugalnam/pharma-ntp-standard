@@ -21,7 +21,7 @@ pytest tests/test_alerts.py::test_is_offset_breach   # 단일 테스트
 ```
 테스트는 `test_alerts.py`(경계값/RISK-001), `test_monitor.py`(모니터링 엔진·상태 전이), `test_api.py`(엔드포인트·httpx) 세 파일이다.
 `is_offset_breach`에는 doctest가 있으나 기본 pytest 실행에는 포함되지 않는다(`--doctest-modules`로 별도 실행).
-`pytest.ini`/`conftest.py`/`pyproject.toml`이 없다 — 기본 discovery에 의존하므로 **`backend/`에서** 실행해야 import가 풀린다. `requirements.txt`도 `backend/`에 있다.
+`pytest.ini`/`pyproject.toml`은 없다 — 기본 discovery에 의존하므로 **`backend/`에서** 실행해야 import가 풀린다. `tests/conftest.py`는 테스트 전용 임시 SQLite(`test_ntp.sqlite3`)를 쓰도록 `NTP_DATABASE_URL`을 설정한다(개발/운영 DB와 분리). `requirements.txt`도 `backend/`에 있다.
 
 ### Frontend (`frontend/`)
 ```bash
@@ -40,7 +40,8 @@ npm run lint       # eslint .
 **Backend 레이어** (`backend/app/`):
 - `main.py` — FastAPI 진입점, CORS, 라우터 등록
 - `config.py` — `Settings`(pydantic-settings). 환경변수 접두사 `NTP_`. 기준 호스트·기본 오프셋 한계 등
-- `api/routes.py` — 모든 REST 엔드포인트(`/api` prefix). **인메모리 dict 저장소**(`_standards`/`_assets`/`_deliverables`)와 정수 시퀀스를 모듈 전역으로 보유
+- `api/routes.py` — 모든 REST 엔드포인트(`/api` prefix). **SQLAlchemy 영속 저장소**(표준/장비/산출물/한계초과 로그)를 `get_db` 세션으로 접근. 한계초과 로그는 폴링 후 DB write-through, 기동 시 `hydrate_from_db`로 복원
+- `db.py` / `models/orm.py` — SQLAlchemy 엔진·세션·Base / ORM 모델(StandardORM·AssetORM·DeliverableORM·AlertORM)
 - `services/ntp.py` — `measure_offset()`: 다중 샘플 **중앙값**으로 오프셋 측정(RISK-004 완화)
 - `services/alerts.py` — `is_offset_breach()`: 오프셋 한계 초과 판정. **경계 규칙: 한계와 같으면 합격, 초과해야 경고.** 이 프로젝트에서 가장 위험도 높은 로직(RISK-001)
 - `services/monitor.py` — `Monitor`: 측정(ntp)과 경고 판정(alerts)을 연결하는 모니터링 엔진. 오프셋 샘플 기록, 경고 OPEN↔CLOSED 전이(FS-022/023), 대시보드 상태 `UNKNOWN/STALE/BREACH/OK` 산정. `STALE`은 last_sync 노후(=poll_interval×`STALE_FACTOR` 초과) 감지로 RISK-003 완화. `routes.py`가 전역 `monitor` 인스턴스 보유
@@ -65,4 +66,4 @@ npm run lint       # eslint .
 
 ## 후속 반복 예정 (현재 미구현)
 
-모니터링 엔진은 구현됐다 — 폴링은 장비 자신(`asset.hostname`)을 질의하고 오프셋을 KRISS 기준으로 보정(장비vsKRISS=(장비vsPC)−(KRISSvsPC), 로컬 시계 미신뢰)하며, 무응답은 `UNREACHABLE`로 구분한다(FS-020). 수동 `POST /api/assets/{id}/poll`과 **자동 백그라운드 스케줄러(FS-024, 병렬 폴링)** 둘 다 동작하고, 프론트 대시보드는 주기적으로 자동 갱신한다. 장비 등록은 NTP 응답 검증 후만 허용(FS-010), 폴링 주기·허용 한계는 화면에서 수정 가능(FS-001), 한계 초과는 **로그(FS-023, `/api/alerts` + 화면 표)** 로 기록한다. 배포는 자세 A(인터넷 ON) + 보안 하드닝(FS-050~052, DS-040): egress는 KRISS UDP 123만 화이트리스트, 앱은 localhost 바인딩, 장비엔 읽기 전용. **감사 추적(FS-040/URS-040)은 범위 제외 결정(2026-06-20)** — 한계 초과 로그로 핵심 이벤트 기록 대체. 남은 예정 작업: SQLAlchemy(SQLite→PostgreSQL) 영속 저장소 전환, 표준 변경 이력(OQ-002 PARTIAL), 보안 OQ-050~052 현장 실행. 검증 진행 현황은 `docs/07-iq-protocol.md`·`docs/08-oq-protocol.md`의 결과 열 참조.
+모니터링 엔진은 구현됐다 — 폴링은 장비 자신(`asset.hostname`)을 질의하고 오프셋을 KRISS 기준으로 보정(장비vsKRISS=(장비vsPC)−(KRISSvsPC), 로컬 시계 미신뢰)하며, 무응답은 `UNREACHABLE`로 구분한다(FS-020). 수동 `POST /api/assets/{id}/poll`과 **자동 백그라운드 스케줄러(FS-024, 병렬 폴링)** 둘 다 동작하고, 프론트 대시보드는 주기적으로 자동 갱신한다. 장비 등록은 NTP 응답 검증 후만 허용(FS-010), 폴링 주기·허용 한계는 화면에서 수정 가능(FS-001), 한계 초과는 **로그(FS-023, `/api/alerts` + 화면 표)** 로 기록한다. 배포는 자세 A(인터넷 ON) + 보안 하드닝(FS-050~052, DS-040): egress는 KRISS UDP 123만 화이트리스트, 앱은 localhost 바인딩, 장비엔 읽기 전용. **감사 추적(FS-040/URS-040)은 범위 제외 결정(2026-06-20)** — 한계 초과 로그로 핵심 이벤트 기록 대체. **영속 저장소(SQLAlchemy/SQLite)는 구현 완료** — 표준·장비·산출물·한계초과 로그가 재시작 후에도 유지(OQ-028). 남은 예정 작업: PostgreSQL 운영 전환, 표준 변경 이력(OQ-002 PARTIAL), 보안 OQ-050~052 현장 실행. 검증 진행 현황은 `docs/07-iq-protocol.md`·`docs/08-oq-protocol.md`의 결과 열 참조.

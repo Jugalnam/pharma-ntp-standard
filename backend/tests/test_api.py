@@ -42,6 +42,18 @@ def test_asset_create_no_validate_and_delete():
     assert client.delete(f"/api/assets/{aid}").status_code == 404
 
 
+def test_persistence_standard_survives_new_session():
+    """영속 저장: 생성한 표준이 새 DB 세션(=재시작 모사)에서도 조회된다."""
+    r = client.post("/api/standards", json={"name": "PERSIST", "source_host": "x"})
+    sid = r.json()["id"]
+    from app.db import SessionLocal
+    from app.models.orm import StandardORM
+
+    with SessionLocal() as db:
+        o = db.get(StandardORM, sid)
+        assert o is not None and o.name == "PERSIST"
+
+
 def test_deliverable_invalid_transition_rejected():
     r = client.post("/api/deliverables", json={"type": "OQ", "title": "OQ 프로토콜"})
     did = r.json()["id"]
