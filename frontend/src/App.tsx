@@ -26,6 +26,21 @@ const clockFmt = new Intl.DateTimeFormat('ko-KR', {
   hour12: false,
 })
 
+const DASHBOARD_REFRESH_MS = 5000 // 대시보드 자동 갱신 주기
+
+// 상태 한글 라벨 (UNKNOWN/UNREACHABLE/STALE/BREACH/OK)
+const STATUS_LABEL: Record<string, string> = {
+  OK: '정상',
+  BREACH: '한계 초과',
+  STALE: '갱신 지연',
+  UNREACHABLE: '응답 없음',
+  UNKNOWN: '미측정',
+}
+
+const statusClass = (s: string) => `badge badge--${s.toLowerCase()}`
+const fmtOffset = (ms: number | null) => (ms === null ? '—' : ms.toFixed(2))
+const fmtSync = (iso: string | null) => (iso ? clockFmt.format(new Date(iso)) : '—')
+
 function App() {
   const [health, setHealth] = useState<string>('확인 중…')
   const [referenceSource, setReferenceSource] = useState<string>('')
@@ -46,11 +61,26 @@ function App() {
         setReferenceSource(d.reference_source)
       })
       .catch(() => setError('백엔드에 연결할 수 없습니다. (uvicorn 실행 여부 확인)'))
+  }, [])
 
-    fetch('/api/dashboard')
-      .then((r) => r.json())
-      .then(setDashboard)
-      .catch(() => {})
+  // 대시보드 자동 갱신: 마운트 시 1회 + 5초마다(백엔드 스케줄러가 폴링한 최신값 반영)
+  useEffect(() => {
+    let cancelled = false
+    const load = () =>
+      fetch('/api/dashboard')
+        .then((r) => r.json())
+        .then((d) => {
+          if (cancelled) return
+          setDashboard(d)
+          setError(null)
+        })
+        .catch(() => {})
+    load()
+    const id = setInterval(load, DASHBOARD_REFRESH_MS)
+    return () => {
+      cancelled = true
+      clearInterval(id)
+    }
   }, [])
 
   // 기준 시각 앵커 동기화: 즉시 1회 + 60초마다 재동기(드리프트 보정)
@@ -113,7 +143,14 @@ function App() {
       {error && <div className="error">{error}</div>}
 
       <section>
-        <h2>동기화 모니터링 대시보드</h2>
+        <div className="section-head">
+          <h2>동기화 모니터링 대시보드</h2>
+          <span className="refresh-note">
+            {dashboard
+              ? `자동 갱신 · 최근 ${fmtSync(dashboard.generated_at)}`
+              : '불러오는 중…'}
+          </span>
+        </div>
         {!dashboard || dashboard.assets.length === 0 ? (
           <p className="empty">
             등록된 장비가 없습니다. 백엔드 <code>/api/assets</code> 로 장비를
@@ -136,10 +173,14 @@ function App() {
                 <tr key={a.asset_id}>
                   <td>{a.name}</td>
                   <td>{a.gxp_critical ? '✔' : ''}</td>
-                  <td>{a.offset_ms ?? '—'}</td>
-                  <td>{a.max_offset_ms}</td>
-                  <td>{a.status}</td>
-                  <td>{a.last_sync ?? '—'}</td>
+                  <td className="num">{fmtOffset(a.offset_ms)}</td>
+                  <td className="num">{a.max_offset_ms}</td>
+                  <td>
+                    <span className={statusClass(a.status)}>
+                      {STATUS_LABEL[a.status] ?? a.status}
+                    </span>
+                  </td>
+                  <td>{fmtSync(a.last_sync)}</td>
                 </tr>
               ))}
             </tbody>

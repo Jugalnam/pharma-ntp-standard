@@ -29,6 +29,23 @@ def _now() -> datetime:
     return datetime.now(timezone.utc)
 
 
+def is_due(last_attempt: datetime | None, poll_interval_s: int, now: datetime) -> bool:
+    """스케줄러 폴링 시점 판정(FS-024): 미측정이거나 주기가 경과하면 True.
+
+    >>> from datetime import datetime, timezone, timedelta
+    >>> t = datetime(2026, 6, 20, tzinfo=timezone.utc)
+    >>> is_due(None, 60, t)
+    True
+    >>> is_due(t, 60, t + timedelta(seconds=59))
+    False
+    >>> is_due(t, 60, t + timedelta(seconds=60))
+    True
+    """
+    if last_attempt is None:
+        return True
+    return (now - last_attempt).total_seconds() >= poll_interval_s
+
+
 @dataclass
 class PollResult:
     """폴링 1회 결과. 장비 응답 여부와 기준 보정 여부를 함께 전달한다."""
@@ -48,6 +65,7 @@ class Monitor:
     latest: dict[int, OffsetSample] = field(default_factory=dict)   # asset_id -> 최신 샘플
     alerts: list[Alert] = field(default_factory=list)               # 전체 경고 이력(FS-023)
     unreachable: dict[int, datetime] = field(default_factory=dict)  # asset_id -> 최근 무응답 시각(FS-020)
+    last_attempt: dict[int, datetime] = field(default_factory=dict) # asset_id -> 최근 폴링 시도 시각(FS-024)
     _open: dict[int, Alert] = field(default_factory=dict)           # asset_id -> 미해제 경고
     _alert_seq: int = 0
 
@@ -116,6 +134,7 @@ class Monitor:
         """
         measure = measure or (lambda host: measure_offset(host))
         at = at or _now()
+        self.last_attempt[asset.id] = at  # 스케줄러 due 판정 기준(FS-024)
 
         # 1) 장비 시각 측정 (PC 대비). 무응답 → UNREACHABLE.
         try:

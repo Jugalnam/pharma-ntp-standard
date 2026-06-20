@@ -3,6 +3,8 @@
 초기 골격: 인메모리 저장소 기반. 표준/장비/대시보드/산출물 CRUD 스텁을 제공한다.
 후속 반복에서 영속 저장소(SQLAlchemy)와 감사 추적(FS-040)을 연결한다.
 """
+import asyncio
+import logging
 from datetime import datetime, timezone, timedelta
 from fastapi import APIRouter, HTTPException
 
@@ -13,8 +15,10 @@ from app.models.schemas import (
     Deliverable, DeliverableIn, DeliverableStatus,
     OffsetSample, Alert,
 )
-from app.services.monitor import Monitor
+from app.services.monitor import Monitor, is_due
 from app.services.ntp import measure_offset, is_plausible_offset
+
+logger = logging.getLogger("ntp.scheduler")
 
 router = APIRouter(prefix="/api")
 
@@ -31,6 +35,32 @@ monitor = Monitor()
 def _next(key: str) -> int:
     _seq[key] += 1
     return _seq[key]
+
+
+async def run_scheduler() -> None:
+    """주기적 백그라운드 폴링 스케줄러(FS-024, RISK-003 완화).
+
+    scheduler_tick_s마다 깨어나, 각 장비를 표준의 poll_interval_s 주기로 측정한다.
+    블로킹 NTP 측정은 스레드로 분리해 이벤트 루프를 막지 않는다. 개별 폴링 실패는
+    로깅 후 계속하여 한 장비의 무응답이 전체 스케줄러를 멈추지 않게 한다.
+    """
+    logger.info("scheduler started (tick=%ss)", settings.scheduler_tick_s)
+    try:
+        while True:
+            await asyncio.sleep(settings.scheduler_tick_s)
+            now = datetime.now(timezone.utc)
+            for asset in list(_assets.values()):
+                std = _standards.get(asset.standard_id) if asset.standard_id else None
+                if std is None:
+                    continue
+                if is_due(monitor.last_attempt.get(asset.id), std.poll_interval_s, now):
+                    try:
+                        await asyncio.to_thread(monitor.poll, asset, std)
+                    except Exception as e:  # 개별 장비 실패는 격리
+                        logger.warning("scheduled poll failed for asset %s: %s", asset.id, e)
+    except asyncio.CancelledError:
+        logger.info("scheduler stopped")
+        raise
 
 
 @router.get("/health")

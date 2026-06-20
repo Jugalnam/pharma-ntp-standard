@@ -6,7 +6,7 @@ RISK-003(STALE 감지). 경계값과 상태 전이를 명시적으로 검증한�
 from datetime import datetime, timedelta, timezone
 
 from app.models.schemas import Asset, TimeStandard, AlertStatus
-from app.services.monitor import Monitor, NtpResult, STALE_FACTOR
+from app.services.monitor import Monitor, NtpResult, STALE_FACTOR, is_due
 from app.services.ntp import is_plausible_offset
 
 
@@ -83,6 +83,22 @@ def test_unreachable_then_recovered():
     res = m.poll(a, s, measure=fake)
     assert res.reachable and m.status_of(a, s) == "OK"
     assert a.id not in m.unreachable
+
+
+def test_fs024_scheduler_due():
+    """FS-024: 미측정이거나 poll_interval 경과 시 폴링 대상(due)."""
+    t0 = datetime(2026, 6, 20, tzinfo=timezone.utc)
+    assert is_due(None, 60, t0) is True                          # 미측정 → due
+    assert is_due(t0, 60, t0 + timedelta(seconds=59)) is False   # 주기 내 → 아님
+    assert is_due(t0, 60, t0 + timedelta(seconds=60)) is True     # 경계 → due
+
+
+def test_fs024_poll_records_last_attempt():
+    """폴링 시 응답/무응답 모두 last_attempt가 기록되어 스케줄러가 중복 폴링하지 않는다."""
+    m, a, s = Monitor(), _asset(), _std()
+    t0 = datetime(2026, 6, 20, tzinfo=timezone.utc)
+    m.poll(a, s, measure=lambda h: NtpResult(offset_ms=5.0, stratum=3), at=t0)
+    assert m.last_attempt[a.id] == t0
 
 
 def test_fs052_offset_sanity_bound():

@@ -65,4 +65,4 @@ npm run lint       # eslint .
 
 ## 후속 반복 예정 (현재 미구현)
 
-모니터링 엔진은 구현됐고(수동 폴링 `POST /api/assets/{id}/poll` → 실측 → 대시보드/경고), OQ-020/021/022/023이 실측 검증을 통과했다. 남은 예정 작업: **주기적 백그라운드 폴링 스케줄러**(현재는 수동 트리거만), SQLAlchemy(SQLite→PostgreSQL) 전환, **감사 추적(FS-040, OQ-040 유보 중)** 및 표준 변경 이력(OQ-002 PARTIAL). 검증 진행 현황은 `docs/07-iq-protocol.md`·`docs/08-oq-protocol.md`의 결과 열 참조.
+모니터링 엔진은 구현됐다 — 폴링은 장비 자신(`asset.hostname`)을 질의하고 오프셋을 KRISS 기준으로 보정(장비vsKRISS=(장비vsPC)−(KRISSvsPC), 로컬 시계 미신뢰)하며, 무응답은 `UNREACHABLE`로 구분한다(FS-020). 수동 `POST /api/assets/{id}/poll`과 **자동 백그라운드 스케줄러(FS-024)** 둘 다 동작하고, 프론트 대시보드는 주기적으로 자동 갱신한다. 배포는 자세 A(인터넷 ON) + 보안 하드닝(FS-050~052, DS-040): egress는 KRISS UDP 123만 화이트리스트, 앱은 localhost 바인딩, 장비엔 읽기 전용. 남은 예정 작업: SQLAlchemy(SQLite→PostgreSQL) 전환, **감사 추적(FS-040, OQ-040 유보 중)** 및 표준 변경 이력(OQ-002 PARTIAL), 보안 OQ-050~052 현장 실행. 검증 진행 현황은 `docs/07-iq-protocol.md`·`docs/08-oq-protocol.md`의 결과 열 참조.

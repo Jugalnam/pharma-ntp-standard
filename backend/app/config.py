@@ -18,6 +18,9 @@ class Settings(BaseSettings):
     ntp_timeout_s: float = 5.0
     # 기준 시각 합리적 범위(ms) — 초과 시 스푸핑/이상치로 보고 미신뢰(FS-052, RISK-009). 기본 1시간.
     ntp_sanity_bound_ms: float = 3_600_000.0
+    # 주기적 백그라운드 폴링 스케줄러(FS-024). tick마다 깨어나 due 장비를 측정.
+    scheduler_enabled: bool = True
+    scheduler_tick_s: float = 10.0
     # 운영 DB로 전환 시 사용 (현재 골격은 인메모리 저장소)
     database_url: str = "sqlite:///./pharma_ntp.sqlite3"
 

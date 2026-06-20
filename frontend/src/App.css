@@ -111,9 +111,78 @@ th {
   font-weight: 600;
 }
 
+.section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.refresh-note {
+  color: #888;
+  font-size: 0.78rem;
+}
+
+td.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.12rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+.badge--ok {
+  color: #1a7f37;
+  background: #e6f4ea;
+  border-color: #b7e1c4;
+}
+.badge--breach {
+  color: #a12622;
+  background: #fdecea;
+  border-color: #f0b4b1;
+}
+.badge--stale,
+.badge--unknown {
+  color: #b35900;
+  background: #fff3e6;
+  border-color: #f0cfa8;
+}
+.badge--unreachable {
+  color: #4b4b4b;
+  background: #ececec;
+  border-color: #cfcfcf;
+}
+
 footer {
   margin-top: 2.5rem;
   font-size: 0.85rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  .badge--ok {
+    background: #14321f;
+    border-color: #1f5133;
+  }
+  .badge--breach {
+    background: #3a1715;
+    border-color: #6b2421;
+  }
+  .badge--stale,
+  .badge--unknown {
+    background: #3a2710;
+    border-color: #6b4a1f;
+  }
+  .badge--unreachable {
+    background: #2a2a2a;
+    border-color: #444;
+    color: #bbb;
+  }
 }
 
 @media (prefers-color-scheme: dark) {
