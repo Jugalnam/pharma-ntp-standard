@@ -38,6 +38,12 @@
 | 10 | [KRISS 표준 정합성 검증 요약 보고서](10-kriss-conformance-report.md) | VSR | 전체 종합 (KRISS 표준 증명) | Draft |
 | 11 | [규제·산업 모범사례 분석](11-regulatory-best-practices.md) | REG | 횡단 (URS 외부 근거) | Draft |
 
+## 운영 문서 (V 모델 외)
+
+| 문서 | ID | 대상 | 용도 |
+|------|----|----|------|
+| [장비 NTP 설정 확인·등록 매뉴얼](manual-device-ntp-setup.md) | MAN | QC 운영자 | 감시 대상 장비의 NTP 응답 설정·등록·트러블슈팅 실무 절차 |
+
 ## 문서 상태 정의
 
 `Draft`(작성중) → `Reviewed`(검토완료) → `Approved`(승인) → `Effective`(발효)

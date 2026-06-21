@@ -1,0 +1,2839 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>pharma-ntp-standard · 검증 문서 패키지</title>
+<style>
+:root{--navy:#1a2b4a;--gold:#b8860b;--ink:#222;--muted:#667;--line:#e3e6ec;--bg:#f6f7f9;}
+*{box-sizing:border-box;}
+body{margin:0;font-family:-apple-system,'Segoe UI',Roboto,'Malgun Gothic',sans-serif;
+  color:var(--ink);background:var(--bg);line-height:1.65;}
+a{color:var(--navy);text-decoration:none;}
+a:hover{text-decoration:underline;}
+nav.sidebar{position:fixed;top:0;left:0;width:264px;height:100vh;overflow-y:auto;
+  background:var(--navy);color:#cdd6e6;padding:1.4rem 0;}
+nav.sidebar .brand{padding:0 1.3rem 1rem;border-bottom:1px solid #2e4368;}
+nav.sidebar .brand h1{font-size:1.05rem;color:#fff;margin:0 0 .25rem;}
+nav.sidebar .brand p{font-size:.72rem;color:#8fa0bd;margin:0;}
+nav.sidebar a{display:block;color:#cdd6e6;font-size:.83rem;padding:.5rem 1.3rem;
+  border-left:3px solid transparent;}
+nav.sidebar a:hover{background:#223a5e;color:#fff;text-decoration:none;}
+nav.sidebar a.active{background:rgba(184,134,11,.16);border-left-color:var(--gold);color:#fff;}
+main{margin-left:264px;padding:2.4rem 3rem 6rem;max-width:980px;}
+.cover{background:var(--navy);color:#fff;border-radius:12px;padding:2rem 2.2rem;margin-bottom:2.5rem;}
+.cover h1{margin:.1rem 0 .4rem;font-size:1.7rem;}
+.cover .sub{color:#aebbd4;font-size:.95rem;}
+.cover .disclaimer{margin-top:1rem;font-size:.8rem;color:#d8c089;background:rgba(184,134,11,.12);
+  border:1px solid rgba(184,134,11,.4);border-radius:8px;padding:.6rem .85rem;}
+.cover .meta{margin-top:.8rem;font-size:.76rem;color:#8fa0bd;}
+section.doc{background:#fff;border:1px solid var(--line);border-radius:12px;
+  padding:1.8rem 2.1rem;margin-bottom:2rem;}
+section.doc>h1:first-child{margin-top:0;}
+h1,h2,h3,h4{color:var(--navy);line-height:1.3;}
+h1{font-size:1.5rem;border-bottom:3px solid var(--gold);padding-bottom:.35rem;}
+h2{font-size:1.2rem;margin-top:1.8rem;border-bottom:1px solid var(--line);padding-bottom:.25rem;}
+h3{font-size:1.02rem;margin-top:1.3rem;}
+table{border-collapse:collapse;width:100%;margin:1rem 0;font-size:.84rem;}
+th,td{border:1px solid var(--line);padding:.5rem .65rem;text-align:left;vertical-align:top;}
+th{background:var(--navy);color:#fff;font-weight:600;}
+tbody tr:nth-child(even){background:#f7f9fc;}
+code{background:#eef1f6;padding:.1rem .35rem;border-radius:4px;font-size:.85em;
+  font-family:'Cascadia Code',Consolas,monospace;}
+pre{background:#0f1b2e;color:#d6e0f0;padding:1rem 1.2rem;border-radius:8px;overflow:auto;
+  font-size:.8rem;line-height:1.5;}
+pre code{background:none;color:inherit;padding:0;}
+blockquote{margin:1rem 0;padding:.6rem 1rem;background:#fbf7ec;border-left:4px solid var(--gold);
+  color:#5b4a1a;border-radius:0 6px 6px 0;}
+blockquote p{margin:.3rem 0;}
+del{color:#9aa0aa;}
+ul,ol{padding-left:1.4rem;}
+li{margin:.2rem 0;}
+hr{border:none;border-top:1px solid var(--line);margin:2rem 0;}
+.totop{position:fixed;right:1.4rem;bottom:1.4rem;background:var(--navy);color:#fff;
+  width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:1.1rem;box-shadow:0 2px 8px rgba(0,0,0,.25);}
+.totop:hover{background:var(--gold);text-decoration:none;}
+@media print{
+  nav.sidebar,.totop{display:none;}
+  body{background:#fff;}
+  main{margin:0;max-width:none;padding:0;}
+  .cover,section.doc{border:none;border-radius:0;box-shadow:none;}
+  section.doc{padding:0;margin:0 0 1.5rem;page-break-before:always;}
+  section#doc-readme{page-break-before:avoid;}
+  th{background:#1a2b4a !important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  pre{background:#f0f0f0;color:#111;border:1px solid #ccc;}
+}
+@media(max-width:820px){
+  nav.sidebar{position:static;width:100%;height:auto;}
+  main{margin-left:0;padding:1.4rem;}
+}
+</style>
+</head>
+<body>
+<nav class="sidebar">
+  <div class="brand">
+    <h1>pharma-ntp-standard</h1>
+    <p>검증 문서 패키지 · GAMP 5 V 모델</p>
+  </div>
+  <a href="#doc-readme">문서 인덱스</a><a href="#doc-00">00 · 검증 계획 (VP)</a><a href="#doc-01">01 · 사용자 요구사항 (URS)</a><a href="#doc-02">02 · 기능 명세 (FS)</a><a href="#doc-03">03 · 설계 명세 (DS)</a><a href="#doc-04">04 · 위험 평가 (RA)</a><a href="#doc-05">05 · UTCk 기준 분석 (REF)</a><a href="#doc-06">06 · 추적성 매트릭스 (RTM)</a><a href="#doc-07">07 · IQ 프로토콜</a><a href="#doc-08">08 · OQ 프로토콜</a><a href="#doc-09">09 · PQ 프로토콜</a><a href="#doc-10">10 · KRISS 정합성 보고서 (VSR)</a><a href="#doc-11">11 · 규제·모범사례 (REG)</a><a href="#doc-manual">운영 매뉴얼 · 장비 NTP 설정</a>
+</nav>
+<main>
+  <header class="cover">
+    <div class="sub">제약(GxP) NTP 시간 표준 — KRISS UTC(k) 준거 모니터링·검증</div>
+    <h1>컴퓨터 시스템 검증(CSV) 문서 패키지</h1>
+    <div class="sub">GAMP 5 기반 V 모델 산출물 · 시스템 영향도: 직접 영향 시스템</div>
+    <div class="disclaimer">⚠ 공식 인증 제품이 아니라 UTCk에 <em>준하는</em> 오픈소스 참조 구현입니다.
+      실제 규제 환경 적용 시 별도 검증이 필요합니다.</div>
+    <div class="meta">생성일 2026-06-21 · 자동 변환(build_html.py)</div>
+  </header>
+  <section id="doc-readme" class="doc">
+<h1 id="v">검증 문서 (V 모델 산출물)</h1>
+<p>본 디렉터리는 GAMP 5 기반 <strong>V 모델</strong>에 따른 컴퓨터 시스템 검증(CSV) 산출물을 담습니다.
+각 산출물은 고유 ID로 항목을 식별하며, <a href="#doc-06">추적성 매트릭스</a>로 좌·우 가지가 연결됩니다.</p>
+<h2 id="v_1">V 모델 개요</h2>
+<pre><code>검증 계획(VP) ─────────────────────────────────────────┐
+                                                        │
+  URS  사용자 요구사항 ─────────────────────────────  PQ  성능 적격성
+   │                                                    │
+   FS  기능 명세 ───────────────────────────────────  OQ  운영 적격성
+    │                                                   │
+    DS  설계 명세 ──────────────────────────────────  IQ  설치 적격성
+     │                                                  │
+      └────────── 구현 / 단위 테스트 ──────────────────┘
+</code></pre>
+<ul>
+<li><strong>왼쪽 가지(분해)</strong>: 요구사항을 점점 구체화 — URS → FS → DS → 구현</li>
+<li><strong>오른쪽 가지(통합/검증)</strong>: 만든 것을 거꾸로 검증 — IQ → OQ → PQ</li>
+<li><strong>수평 연결(검증 대응)</strong>: DS↔IQ, FS↔OQ, URS↔PQ — 각 설계 산출물은 대응하는 검증 단계에서 입증됨</li>
+</ul>
+<h2 id="_1">산출물 인덱스</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>문서</th>
+<th>ID 접두</th>
+<th>V 모델 위치</th>
+<th>상태</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>00</td>
+<td><a href="#doc-00">검증 계획</a></td>
+<td>VP</td>
+<td>전체 관장</td>
+<td>Draft</td>
+</tr>
+<tr>
+<td>01</td>
+<td><a href="#doc-01">사용자 요구사항 명세 (URS)</a></td>
+<td>URS</td>
+<td>좌 최상단</td>
+<td>Draft</td>
+</tr>
+<tr>
+<td>02</td>
+<td><a href="#doc-02">기능 명세 (FS)</a></td>
+<td>FS</td>
+<td>좌 중간</td>
+<td>Draft</td>
+</tr>
+<tr>
+<td>03</td>
+<td><a href="#doc-03">설계 명세 (DS)</a></td>
+<td>DS</td>
+<td>좌 최하단</td>
+<td>Draft</td>
+</tr>
+<tr>
+<td>04</td>
+<td><a href="#doc-04">위험 평가 (RA)</a></td>
+<td>RISK</td>
+<td>횡단</td>
+<td>Draft</td>
+</tr>
+<tr>
+<td>05</td>
+<td><a href="#doc-05">UTCk 기준 표준 분석</a></td>
+<td>REF</td>
+<td>URS-001 근거 / 교차점검 전제</td>
+<td>Draft</td>
+</tr>
+<tr>
+<td>06</td>
+<td><a href="#doc-06">추적성 매트릭스 (RTM)</a></td>
+<td>—</td>
+<td>좌↔우 연결</td>
+<td>Draft</td>
+</tr>
+<tr>
+<td>07</td>
+<td><a href="#doc-07">IQ 프로토콜</a></td>
+<td>IQ</td>
+<td>우 최하단</td>
+<td>Draft</td>
+</tr>
+<tr>
+<td>08</td>
+<td><a href="#doc-08">OQ 프로토콜</a></td>
+<td>OQ</td>
+<td>우 중간</td>
+<td>Draft</td>
+</tr>
+<tr>
+<td>09</td>
+<td><a href="#doc-09">PQ 프로토콜</a></td>
+<td>PQ</td>
+<td>우 최상단</td>
+<td>Draft</td>
+</tr>
+<tr>
+<td>10</td>
+<td><a href="#doc-10">KRISS 표준 정합성 검증 요약 보고서</a></td>
+<td>VSR</td>
+<td>전체 종합 (KRISS 표준 증명)</td>
+<td>Draft</td>
+</tr>
+<tr>
+<td>11</td>
+<td><a href="#doc-11">규제·산업 모범사례 분석</a></td>
+<td>REG</td>
+<td>횡단 (URS 외부 근거)</td>
+<td>Draft</td>
+</tr>
+</tbody>
+</table>
+<h2 id="v_2">운영 문서 (V 모델 외)</h2>
+<table>
+<thead>
+<tr>
+<th>문서</th>
+<th>ID</th>
+<th>대상</th>
+<th>용도</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="#doc-manual">장비 NTP 설정 확인·등록 매뉴얼</a></td>
+<td>MAN</td>
+<td>QC 운영자</td>
+<td>감시 대상 장비의 NTP 응답 설정·등록·트러블슈팅 실무 절차</td>
+</tr>
+</tbody>
+</table>
+<h2 id="_2">문서 상태 정의</h2>
+<p><code>Draft</code>(작성중) → <code>Reviewed</code>(검토완료) → <code>Approved</code>(승인) → <code>Effective</code>(발효)</p>
+<h2 id="_3">변경 관리</h2>
+<p>모든 산출물 변경은 버전과 사유를 기록합니다. 승인된(<code>Approved</code>) 산출물의 변경은 영향 평가와 재승인이 필요합니다.</p>
+</section><section id="doc-00" class="doc">
+<h1 id="validation-plan-vp">검증 계획 (Validation Plan, VP)</h1>
+<table>
+<thead>
+<tr>
+<th>항목</th>
+<th>내용</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>문서 ID</td>
+<td>VP-001</td>
+</tr>
+<tr>
+<td>버전</td>
+<td>0.2 (Draft)</td>
+</tr>
+<tr>
+<td>작성일</td>
+<td>2026-06-19</td>
+</tr>
+<tr>
+<td>개정</td>
+<td>2026-06-21 — §3.2 시스템 영향도 평가(직접 영향 시스템) 추가</td>
+</tr>
+</tbody>
+</table>
+<h2 id="1">1. 목적</h2>
+<p>본 계획은 <code>pharma-ntp-standard</code> 시스템의 컴퓨터 시스템 검증(CSV) 접근 방식, 범위, 책임, 산출물, 합격 기준을 정의한다.</p>
+<h2 id="2">2. 시스템 개요</h2>
+<p>제약(GxP) 환경에서 NTP 시간 동기화 표준을 수립·모니터링·검증하는 웹 애플리케이션. GxP 전자 기록의 타임스탬프 신뢰성을 보장하는 것이 목적이다.</p>
+<h2 id="3-gamp-5">3. GAMP 5 분류 및 시스템 영향도 평가</h2>
+<h3 id="31-gamp-5">3.1 GAMP 5 소프트웨어 카테고리</h3>
+<p>본 시스템은 <strong>GAMP 카테고리 5(맞춤 개발 애플리케이션)</strong> 로 분류한다. 표준 NTP 프로토콜(시간 소스)은 인프라(카테고리 1)에 의존하나, 모니터링·검증·표준 관리 로직은 맞춤 개발이다.</p>
+<h3 id="32-system-impact-assessment">3.2 시스템 영향도 평가 (System Impact Assessment)</h3>
+<p>본 시스템은 <strong>직접 영향 시스템(Direct Impact System)</strong> 으로 분류한다. 최신 분류 체계는 '간접 영향(Indirect Impact)'을 별도 등급으로 두지 않으며, GxP 데이터 무결성에 영향을 주는 시스템은 직접 영향으로 본다.</p>
+<ul>
+<li><strong>근거</strong>: 본 시스템이 생성하는 <a href="#doc-02">한계 초과 로그(FS-023)</a>·<a href="#doc-10">정합성 보고서(VSR-001)</a>는 GxP 전자기록 타임스탬프의 신뢰성을 입증·판단하는 근거로 사용된다. 경고 판정(<a href="#doc-04">RISK-001</a>)이 오작동하면 비동기 장비가 검출되지 않아, 해당 장비가 남긴 GxP 기록의 시각 무결성(ALCOA+의 <em>Contemporaneous</em>)이 훼손될 수 있다.</li>
+<li><strong>범위 경계(중요)</strong>: 본 시스템은 장비 시계를 <strong>설정·보정하지 않는다</strong> — 감시·읽기 전용(NTP mode 3 클라이언트 한정, <a href="#doc-04">RISK-011</a>). 실제 시각 동기화(보정)는 인프라(NTP 서버·OS, GAMP 카테고리 1)의 책임으로 본 검증 범위 밖이다. 따라서 직접 영향의 대상은 <strong>데이터 무결성(감시·보고 기록)</strong> 이며, 시각 <em>제어</em> 기능은 시스템에 포함되지 않는다.</li>
+<li><strong>결과</strong>: 직접 영향 분류에 따라 본 시스템은 전체 V 모델 검증(IQ/OQ/PQ) 대상이다. 위험 기반으로 GxP 영향도가 높은 기능(오프셋 경고·표준 무결성, RISK-001/002)에 검증 노력을 집중한다(§5 참조).</li>
+</ul>
+<h2 id="4-v">4. 검증 접근(V 모델)</h2>
+<table>
+<thead>
+<tr>
+<th>단계</th>
+<th>산출물</th>
+<th>합격 기준</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>요구사항</td>
+<td>URS</td>
+<td>모든 요구사항이 검증 가능(testable)하고 추적 가능</td>
+</tr>
+<tr>
+<td>기능 명세</td>
+<td>FS</td>
+<td>모든 URS 항목이 1개 이상의 FS로 전개</td>
+</tr>
+<tr>
+<td>설계 명세</td>
+<td>DS</td>
+<td>모든 FS 항목이 설계로 구현 가능</td>
+</tr>
+<tr>
+<td>설치 검증</td>
+<td>IQ</td>
+<td>설치/구성 항목 100% 통과</td>
+</tr>
+<tr>
+<td>운영 검증</td>
+<td>OQ</td>
+<td>기능 테스트 케이스 100% 통과(또는 일탈 승인)</td>
+</tr>
+<tr>
+<td>성능 검증</td>
+<td>PQ</td>
+<td>실사용 시나리오에서 요구 성능 충족</td>
+</tr>
+</tbody>
+</table>
+<h2 id="5">5. 위험 기반 접근</h2>
+<p><a href="#doc-04">위험 평가(RISK)</a>에 따라 GxP 영향도가 높은 기능(시간 오프셋 경고, 표준 무결성)에 검증 노력을 집중한다.</p>
+<h2 id="6">6. 역할과 책임</h2>
+<table>
+<thead>
+<tr>
+<th>역할</th>
+<th>책임</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>제품 소유자</td>
+<td>URS 승인, PQ 승인</td>
+</tr>
+<tr>
+<td>개발자</td>
+<td>FS/DS 작성, 구현, 단위 테스트</td>
+</tr>
+<tr>
+<td>품질(QA)</td>
+<td>산출물 검토·승인, 일탈 관리</td>
+</tr>
+<tr>
+<td>검증 담당</td>
+<td>IQ/OQ/PQ 실행·기록</td>
+</tr>
+</tbody>
+</table>
+<h2 id="7">7. 산출물 목록</h2>
+<p><a href="#doc-readme">docs/README.md</a> 인덱스 참조.</p>
+<h2 id="8">8. 합격 및 시스템 릴리스 기준</h2>
+<p>모든 V 모델 산출물이 <code>Approved</code>이고, IQ/OQ/PQ가 통과되었으며, 미해결 중대 일탈이 없을 때 릴리스 가능하다.</p>
+</section><section id="doc-01" class="doc">
+<h1 id="user-requirements-specification-urs">사용자 요구사항 명세 (User Requirements Specification, URS)</h1>
+<table>
+<thead>
+<tr>
+<th>항목</th>
+<th>내용</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>문서 ID</td>
+<td>URS-001</td>
+</tr>
+<tr>
+<td>버전</td>
+<td>0.1 (Draft)</td>
+</tr>
+<tr>
+<td>V 모델 대응</td>
+<td>성능 적격성(PQ)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="1">1. 개요</h2>
+<p>본 문서는 <code>pharma-ntp-standard</code> 시스템에 대한 사용자(품질·운영) 관점의 요구사항을 정의한다.
+각 요구사항은 검증 가능해야 하며, <a href="#doc-09">PQ</a>에서 입증된다.</p>
+<h3 id="11-reference-standard">1.1 기준 표준 (Reference Standard)</h3>
+<p>본 시스템의 신뢰 시간 기준은 <strong>한국표준과학연구원(KRISS)이 유지하는 협정세계시 실현 UTC(KRISS)</strong> 이며,
+KRISS 공식 시각 동기화 프로그램 <strong>UTCk</strong>(v4.1.0.2, <code>time.kriss.re.kr</code> 계열 NTP 소스)가 제공하는 시각을 표준 기준점으로 삼는다.
+본 프로젝트는 공식 인증 제품이 아니며, UTCk를 <strong>참조 기준</strong>으로 하여 그에 준하는 모니터링·검증 체계를 제공한다.</p>
+<h2 id="2">2. 요구사항 표기</h2>
+<ul>
+<li><strong>GxP 영향도</strong>: H(높음)/M(중간)/L(낮음) — <a href="#doc-04">위험 평가</a>와 연계</li>
+<li><strong>우선순위</strong>: Must / Should / Could</li>
+</ul>
+<h2 id="3-time-standard">3. 표준 정의 (Time Standard)</h2>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>요구사항</th>
+<th>GxP</th>
+<th>우선순위</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>URS-001</td>
+<td>시스템은 <strong>KRISS UTC(k)</strong> 를 신뢰 시간 기준으로 하여(기본 NTP 소스: <code>time.kriss.re.kr</code>), 이를 시간 표준으로 정의·관리할 수 있어야 한다.</td>
+<td>H</td>
+<td>Must</td>
+</tr>
+<tr>
+<td>URS-002</td>
+<td>시스템은 동기화 표준 파라미터(허용 오프셋 한계, 폴링 주기, 재동기 정책)를 정의할 수 있어야 한다.</td>
+<td>H</td>
+<td>Must</td>
+</tr>
+<tr>
+<td>URS-003</td>
+<td>표준은 버전 관리되어야 하며, 변경 시 <strong>사유와 변경 이력</strong>이 남아야 한다(version 증가 + 버전별 값 스냅샷·사유 기록). 승인 워크플로우·전자서명은 인증 도입 시 후속.</td>
+<td>H</td>
+<td>Must</td>
+</tr>
+</tbody>
+</table>
+<h2 id="4-asset-management">4. 장비/시스템 관리 (Asset Management)</h2>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>요구사항</th>
+<th>GxP</th>
+<th>우선순위</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>URS-010</td>
+<td>시스템은 시간 동기화 대상 장비/시스템을 등록·조회·수정할 수 있어야 한다.</td>
+<td>M</td>
+<td>Must</td>
+</tr>
+<tr>
+<td>URS-011</td>
+<td>각 장비는 GxP 중요도(critical 여부)로 분류될 수 있어야 한다.</td>
+<td>H</td>
+<td>Must</td>
+</tr>
+<tr>
+<td>URS-012</td>
+<td>장비에 동기화 표준(정책)을 할당할 수 있어야 한다.</td>
+<td>M</td>
+<td>Should</td>
+</tr>
+</tbody>
+</table>
+<h2 id="5-monitoring">5. 모니터링 (Monitoring)</h2>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>요구사항</th>
+<th>GxP</th>
+<th>우선순위</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>URS-020</td>
+<td>시스템은 등록 장비의 시간 오프셋(표준 대비 편차)을 주기적으로 수집해야 한다.</td>
+<td>H</td>
+<td>Must</td>
+</tr>
+<tr>
+<td>URS-021</td>
+<td>시스템은 각 장비의 오프셋·드리프트·stratum·마지막 동기 시각을 대시보드로 표시해야 한다.</td>
+<td>M</td>
+<td>Must</td>
+</tr>
+<tr>
+<td>URS-022</td>
+<td>오프셋이 허용 한계를 초과하면 시스템은 경고(alert)를 발생시켜야 한다.</td>
+<td>H</td>
+<td>Must</td>
+</tr>
+<tr>
+<td>URS-023</td>
+<td>경고 발생·해제 이력은 보존되어야 한다.</td>
+<td>H</td>
+<td>Should</td>
+</tr>
+</tbody>
+</table>
+<h2 id="6-validation-deliverables">6. 검증 산출물 관리 (Validation Deliverables)</h2>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>요구사항</th>
+<th>GxP</th>
+<th>우선순위</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>URS-030</td>
+<td>시스템은 IQ/OQ/PQ 검증 산출물을 생성·조회·갱신할 수 있어야 한다.</td>
+<td>M</td>
+<td>Must</td>
+</tr>
+<tr>
+<td>URS-031</td>
+<td>검증 산출물은 상태(Draft→Approved→Effective)를 가지며 승인 워크플로우를 따라야 한다.</td>
+<td>H</td>
+<td>Should</td>
+</tr>
+<tr>
+<td>URS-032</td>
+<td>산출물은 관련 요구사항(URS/FS/DS)에 추적 연결될 수 있어야 한다.</td>
+<td>M</td>
+<td>Could</td>
+</tr>
+</tbody>
+</table>
+<h2 id="7">7. 데이터 무결성 / 규제 (전제)</h2>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>요구사항</th>
+<th>GxP</th>
+<th>우선순위</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>URS-040</td>
+<td><del>모든 중요 데이터 변경은 변경 불가한 감사 추적(누가/언제/무엇을/왜)으로 기록되어야 한다.</del> <strong>범위 제외</strong> — 아래 주 참조</td>
+<td>(H)</td>
+<td><del>Should</del></td>
+</tr>
+<tr>
+<td>URS-041</td>
+<td>시스템 자체의 타임스탬프는 신뢰 시간 소스에 동기화되어야 한다.</td>
+<td>H</td>
+<td>Must</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>주: <strong>URS-040(전 엔터티 전체 감사 추적)은 본 참조 구현에서 범위 제외(2026-06-20 결정)</strong>. 대신 데이터 무결성에 직결되는 핵심 이벤트인 <strong>허용 한계 초과를 로그로 기록·조회</strong>([FS-023] 한계 초과 로그)하여 대체하고, <strong>표준 변경은 변경 이력(버전별 값 스냅샷·사유)으로 기록</strong>한다(URS-003/FS-002, 2026-06-21 구현). 다만 인증(로그인) 부재로 변경 이력의 '누가(who)'는 <code>system</code>으로만 기록되며, 전자서명 기반 승인 통제는 후속이다. 실제 규제 환경 적용 시 21 CFR Part 11 전 엔터티 감사 추적은 별도 검토가 필요하다(이 시스템은 공식 인증 제품이 아님). 승인 워크플로우(FS-031)도 후속 검토 대상.</p>
+</blockquote>
+<h2 id="8">8. 보안 / 네트워크 격리 (전제)</h2>
+<p>본 시스템은 폐쇄망(인터넷 차단 IP대역)에 연결된 장비를 감시한다. 시스템 도입이 폐쇄망의 격리(보안 통제)를 약화시켜서는 안 된다. 배포 형상은 <strong>자세 A</strong>(모니터링 PC가 인터넷에 연결되어 KRISS를 직접 기준점으로 질의)를 채택하되, 아래 통제로 위험을 낮춘다. (<a href="#doc-04">위험 평가</a> RISK-007~011)</p>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>요구사항</th>
+<th>GxP</th>
+<th>우선순위</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>URS-050</td>
+<td>모니터링 PC의 인터넷 접근은 신뢰 시간 소스(KRISS)로의 <strong>아웃바운드 NTP(UDP 123)로만</strong> 제한되어야 한다(웹 브라우징 등 그 외 외부 통신 차단). 인바운드 인터넷은 차단한다.</td>
+<td>H</td>
+<td>Must</td>
+</tr>
+<tr>
+<td>URS-051</td>
+<td>시스템은 감시 대상 장비에 대해 <strong>읽기 전용(NTP 질의)</strong> 으로만 동작하며, 장비의 시각·설정을 변경하지 않는다(시각을 배포·설정하지 않는다).</td>
+<td>H</td>
+<td>Must</td>
+</tr>
+<tr>
+<td>URS-052</td>
+<td>대시보드/API 접근은 <strong>내부 인터페이스 바인딩 및 인증</strong>으로 통제되어야 하며, 외부에 노출되지 않아야 한다.</td>
+<td>H</td>
+<td>Should</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>자세 A 채택 근거: 최상단(인터넷서버)이 KRISS와 정합한지 <strong>독립 검증</strong>하기 위함. 격리 약화 위험은 egress 화이트리스트·전용 호스트·내부 바인딩으로 잔여 위험을 낮춘다(보안팀 사전 합의 전제).</p>
+</blockquote>
+</section><section id="doc-02" class="doc">
+<h1 id="functional-specification-fs">기능 명세 (Functional Specification, FS)</h1>
+<table>
+<thead>
+<tr>
+<th>항목</th>
+<th>내용</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>문서 ID</td>
+<td>FS-001</td>
+</tr>
+<tr>
+<td>버전</td>
+<td>0.1 (Draft)</td>
+</tr>
+<tr>
+<td>V 모델 대응</td>
+<td>운영 적격성(OQ)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="1">1. 개요</h2>
+<p>본 문서는 <a href="#doc-01">URS</a>를 충족하기 위해 시스템이 제공하는 기능을 명세한다. 각 FS는 1개 이상의 URS에서 전개되며 <a href="#doc-08">OQ</a>에서 검증된다.</p>
+<h2 id="2">2. 기능 목록</h2>
+<h3 id="21">2.1 표준 관리</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>기능</th>
+<th>출처 URS</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>FS-001</td>
+<td>시간 표준(신뢰 소스 + 파라미터) CRUD API와 화면을 제공한다. <strong>폴링 주기·허용 한계는 화면(동기화 설정)에서 수정</strong>할 수 있다.</td>
+<td>URS-001, URS-002</td>
+</tr>
+<tr>
+<td>FS-002</td>
+<td>표준 저장(PUT) 시 <strong>버전을 증가</strong>시키고 <strong>변경 이력 레코드(버전별 값 스냅샷 + 변경 사유)를 append-only로 기록</strong>한다. 이력 조회 API(<code>GET /api/standards/{id}/history</code>)와 화면 표를 제공한다. 인증 부재로 행위자(actor)는 <code>system</code>으로 기록(한계).</td>
+<td>URS-003</td>
+</tr>
+</tbody>
+</table>
+<h3 id="22">2.2 장비 관리</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>기능</th>
+<th>출처 URS</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>FS-010</td>
+<td>장비 등록/조회/삭제 API와 인라인 추가 폼(프론트)을 제공한다. 등록 시 <code>validate=true</code>(기본)면 대상 호스트에 NTP 질의를 보내 <strong>응답하는 장비만 등록</strong>하고, 무응답이면 422로 거부한다(죽은 장비가 등록부에 들어가지 않도록 — 데이터 무결성). 삭제 시 모니터링 상태도 함께 정리한다.</td>
+<td>URS-010</td>
+</tr>
+<tr>
+<td>FS-011</td>
+<td>장비에 <code>gxp_critical</code>(boolean) 분류 필드를 둔다(전 장비 GMP 환경에서는 화면에 노출하지 않을 수 있음).</td>
+<td>URS-011</td>
+</tr>
+<tr>
+<td>FS-012</td>
+<td>장비에 표준(정책) ID를 연결한다.</td>
+<td>URS-012</td>
+</tr>
+</tbody>
+</table>
+<h3 id="23">2.3 모니터링</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>기능</th>
+<th>출처 URS</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>FS-020</td>
+<td>폴링이 각 장비 <strong>자신(<code>asset.hostname</code>)</strong>에 NTP 질의해 오프셋을 측정·저장한다. 로컬 시계 미신뢰 원칙상 오프셋은 <strong>KRISS 기준으로 보정</strong>한다(장비 vs KRISS = (장비 vs PC) − (KRISS vs PC)). 장비 무응답은 <code>UNREACHABLE</code>로, 기준 도달 실패는 미보정(<code>reference_synced=false</code>)으로 구분한다.</td>
+<td>URS-020</td>
+</tr>
+<tr>
+<td>FS-021</td>
+<td>대시보드 API가 장비별 IP/호스트·최신 오프셋·stratum·last_sync와 상태(<code>UNKNOWN/UNREACHABLE/STALE/BREACH/OK</code>)를 반환한다. 프론트는 오프셋·한계를 초(s) 단위로 표시하고 상태를 색상 배지로 시각화한다.</td>
+<td>URS-021</td>
+</tr>
+<tr>
+<td>FS-022</td>
+<td>오프셋 절댓값이 표준의 허용 한계를 초과하면 <code>alert</code> 레코드를 생성하고 상태를 <code>BREACH</code>로 표시한다.</td>
+<td>URS-022</td>
+</tr>
+<tr>
+<td>FS-023</td>
+<td>경고(<strong>한계 초과 로그</strong>)는 장비명·측정 오프셋·당시 허용 한계·생성/해제 타임스탬프를 보존하며, 이력 조회 API(<code>/api/alerts</code>)와 화면 로그 표를 제공한다. OPEN(진행 중)↔CLOSED(해제됨) 생애주기를 추적한다.</td>
+<td>URS-023</td>
+</tr>
+<tr>
+<td>FS-024</td>
+<td>백그라운드 스케줄러가 각 장비를 표준의 <code>poll_interval_s</code> 주기로 자동 폴링한다(수동 트리거 불요). 블로킹 측정은 스레드로 분리하고 <strong>동시 실행(상한 <code>scheduler_concurrency</code>)</strong>하여 무응답 장비의 타임아웃 대기가 다른 장비를 막지 않게 한다. 개별 폴링 실패는 격리해 스케줄러를 지속한다. 대시보드는 클라이언트에서 주기적으로 자동 갱신한다.</td>
+<td>URS-020</td>
+</tr>
+</tbody>
+</table>
+<h3 id="24">2.4 검증 산출물</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>기능</th>
+<th>출처 URS</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>FS-030</td>
+<td>IQ/OQ/PQ 산출물 CRUD API와 화면을 제공한다.</td>
+<td>URS-030</td>
+</tr>
+<tr>
+<td>FS-031</td>
+<td>산출물 상태 전이(Draft→Reviewed→Approved→Effective)를 강제한다.</td>
+<td>URS-031</td>
+</tr>
+<tr>
+<td>FS-032</td>
+<td>산출물에 요구사항 ID 태그를 연결할 수 있다.</td>
+<td>URS-032</td>
+</tr>
+</tbody>
+</table>
+<h3 id="25">2.5 공통 / 데이터 무결성</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>기능</th>
+<th>출처 URS</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>FS-040</td>
+<td><del>중요 엔터티 변경 시 audit 레코드를 append-only로 기록한다.</del> <strong>범위 제외(2026-06-20)</strong> — 전체 감사 추적 대신 [FS-023] 한계 초과 로그로 핵심 이벤트(데이터 무결성 직결) 기록을 대체한다.</td>
+<td>URS-040</td>
+</tr>
+<tr>
+<td>FS-041</td>
+<td>시스템 시각은 구성된 NTP 소스 기준으로 표시한다. <code>GET /api/time</code>이 server UTC에 KRISS 오프셋을 보정한 <strong>기준 시각</strong>(<code>reference_utc</code>)·stratum·동기 여부를 반환하고, 대시보드는 이를 앵커로 KST(UTC+9) 대형 시계를 표시한다. NTP 도달 실패 시 <code>synced=false</code>로 서버 시각을 폴백 표시(미검증 명시).</td>
+<td>URS-041</td>
+</tr>
+<tr>
+<td>FS-042</td>
+<td>기준 시계를 화면 전체로 표시하는 <strong>전체화면 모드</strong>를 제공한다(벽시계 용도, 24시간 상시 표시). 사용자 조작으로 진입/해제하며(브라우저 Fullscreen API), 진입 시 화면 절전·화면보호기를 억제한다(Screen Wake Lock API, 탭 복귀 시 자동 재획득). 전체화면에서도 <strong>동기화 상태(양호/미검증)는 항상 함께 표시</strong>해 미검증 시각이 신뢰 시각으로 오인되지 않게 한다(FS-041의 표시 무결성 원칙 유지).</td>
+<td>URS-041</td>
+</tr>
+</tbody>
+</table>
+<h3 id="26">2.6 보안 / 네트워크</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>기능</th>
+<th>출처 URS</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>FS-050</td>
+<td>백엔드/프론트는 기본적으로 루프백(localhost) 또는 내부 인터페이스에만 바인딩하며, 노출 시 인증을 요구한다. 인터넷 아웃바운드는 구성된 신뢰 소스 호스트(KRISS)·NTP(UDP 123)로만 제한하는 배포 전제를 둔다.</td>
+<td>URS-050, URS-052</td>
+</tr>
+<tr>
+<td>FS-051</td>
+<td>NTP 측정은 <strong>클라이언트 모드(mode 3) 읽기</strong>로만 수행한다. 시각 설정·제어 모드(mode 6/7) 기능을 제공하지 않아 장비 시각·설정을 변경할 수 없다.</td>
+<td>URS-051</td>
+</tr>
+<tr>
+<td>FS-052</td>
+<td>신뢰 시간 소스로의 통신은 구성된 호스트로만 향하며, <strong>다중 샘플 중앙값 + 합리적 범위(sanity bound) 검증</strong>으로 스푸핑·이상치를 완화한다. 이상 시 <code>synced=false</code>로 표시한다.</td>
+<td>URS-050</td>
+</tr>
+</tbody>
+</table>
+<h2 id="3">3. 비기능 요구</h2>
+<ul>
+<li>모니터링 폴링 주기는 표준당 구성 가능(기본 60초).</li>
+<li>대시보드 API 응답 1초 이내(현실 규모: GMP 현장 수십 대 장비 기준) — <a href="#doc-09">PQ</a>에서 검증.</li>
+</ul>
+</section><section id="doc-03" class="doc">
+<h1 id="design-specification-ds">설계 명세 (Design Specification, DS)</h1>
+<table>
+<thead>
+<tr>
+<th>항목</th>
+<th>내용</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>문서 ID</td>
+<td>DS-001</td>
+</tr>
+<tr>
+<td>버전</td>
+<td>0.1 (Draft)</td>
+</tr>
+<tr>
+<td>V 모델 대응</td>
+<td>설치 적격성(IQ)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="1">1. 개요</h2>
+<p>본 문서는 <a href="#doc-02">FS</a>를 구현하기 위한 아키텍처·데이터 모델·인터페이스 설계를 정의한다. 각 DS는 <a href="#doc-07">IQ</a>에서 설치/구성이 검증된다.</p>
+<h2 id="2-ds-001">2. 아키텍처 (DS-001)</h2>
+<pre><code>[브라우저] ──HTTP──&gt; [React/Vite SPA] ──REST/JSON──&gt; [FastAPI] ──&gt; [DB: SQLite/PostgreSQL]
+                                                         │
+                                                  [폴링 워커] ──NTP──&gt; [장비 / 시간 소스]
+</code></pre>
+<ul>
+<li><strong>Frontend</strong>: React + Vite + TypeScript. 라우팅, 대시보드, 표준/장비/검증 관리 화면.</li>
+<li><strong>Backend</strong>: FastAPI. 계층 — <code>api</code>(라우터) / <code>services</code>(도메인 로직) / <code>models</code>(ORM·스키마).</li>
+<li><strong>폴링 워커</strong>: 백그라운드 태스크가 장비별 NTP 오프셋을 측정(초기: <code>ntplib</code>).</li>
+<li><strong>DB</strong>: SQLAlchemy ORM. 개발 SQLite(<code>pharma_ntp.sqlite3</code>), 운영 PostgreSQL(<code>NTP_DATABASE_URL</code>만 변경). <strong>영속 대상: 표준·장비·산출물·한계초과 로그.</strong> 실시간 측정값(오프셋·도달성·last_attempt)은 폴링으로 재생성되므로 모니터링 엔진 인메모리에 두고, 한계초과 로그는 DB와 write-through하며 기동 시 복원한다.</li>
+</ul>
+<h2 id="3-ds-010">3. 데이터 모델 (DS-010)</h2>
+<table>
+<thead>
+<tr>
+<th>엔터티</th>
+<th>주요 필드</th>
+<th>비고</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>TimeStandard</code></td>
+<td>id, name, source_host(기본 <code>time.kriss.re.kr</code>), max_offset_ms, poll_interval_s, version</td>
+<td>FS-001/002, KRISS UTC(k) 기준</td>
+</tr>
+<tr>
+<td><code>StandardHistory</code></td>
+<td>id, standard_id, version, name, source_host, max_offset_ms, poll_interval_s, reason, actor, changed_at</td>
+<td>FS-002, <strong>영속</strong>(변경 이력, append-only). actor는 인증 부재로 <code>system</code></td>
+</tr>
+<tr>
+<td><code>Asset</code></td>
+<td>id, name, hostname, gxp_critical, standard_id</td>
+<td>FS-010~012</td>
+</tr>
+<tr>
+<td><code>OffsetSample</code></td>
+<td>asset_id, measured_at, offset_ms, stratum</td>
+<td>FS-020/021, <strong>인메모리</strong>(폴링 재생성)</td>
+</tr>
+<tr>
+<td><code>Alert</code></td>
+<td>id, asset_id, asset_name, opened_at, closed_at, offset_ms, limit_ms, status</td>
+<td>FS-022/023, <strong>영속</strong>(한계초과 로그)</td>
+</tr>
+<tr>
+<td><code>Deliverable</code></td>
+<td>id, type(IQ/OQ/PQ), title, status, requirement_tags</td>
+<td>FS-030~032, 영속</td>
+</tr>
+<tr>
+<td><del><code>AuditEntry</code></del></td>
+<td>—</td>
+<td><strong>범위 제외(2026-06-20)</strong> — Alert(한계초과 로그)로 핵심 이벤트 기록 대체</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>영속 테이블(<code>standards</code>/<code>assets</code>/<code>deliverables</code>/<code>alerts</code>)은 SQLAlchemy ORM([backend/app/models/orm.py])으로 정의되며, Pydantic 도메인 모델과 <code>from_attributes</code>로 변환된다.</p>
+</blockquote>
+<h2 id="4-api-ds-020">4. API 설계 (DS-020)</h2>
+<table>
+<thead>
+<tr>
+<th>메서드</th>
+<th>경로</th>
+<th>기능</th>
+<th>FS</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET/POST</td>
+<td><code>/api/standards</code></td>
+<td>표준 목록/생성</td>
+<td>FS-001</td>
+</tr>
+<tr>
+<td>GET/PUT</td>
+<td><code>/api/standards/{id}</code></td>
+<td>표준 조회/수정(버전 증가 + 변경 이력 기록)</td>
+<td>FS-001/002</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/standards/{id}/history</code></td>
+<td>표준 변경 이력(버전별 값 스냅샷·사유)</td>
+<td>FS-002</td>
+</tr>
+<tr>
+<td>GET/POST</td>
+<td><code>/api/assets</code></td>
+<td>장비 목록/등록(POST <code>?validate=true</code>면 NTP 응답 확인 후 등록)</td>
+<td>FS-010</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td><code>/api/assets/{id}</code></td>
+<td>장비 등록 해제(모니터링 상태 정리)</td>
+<td>FS-010</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/assets/{id}/poll</code></td>
+<td>장비 1회 수동 폴링(reachable/reference_synced 반환)</td>
+<td>FS-020</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/dashboard</code></td>
+<td>장비별 IP·최신 오프셋·상태</td>
+<td>FS-021</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/alerts</code></td>
+<td>경고 이력</td>
+<td>FS-023</td>
+</tr>
+<tr>
+<td>GET/POST</td>
+<td><code>/api/deliverables</code></td>
+<td>검증 산출물</td>
+<td>FS-030</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/health</code></td>
+<td>헬스체크</td>
+<td>IQ</td>
+</tr>
+</tbody>
+</table>
+<h2 id="5-ds-030">5. 상태 전이 (DS-030)</h2>
+<ul>
+<li>산출물: <code>Draft → Reviewed → Approved → Effective</code> (역방향/건너뛰기 불가) — FS-031</li>
+<li>경고: <code>OPEN → CLOSED</code> (오프셋이 한계 내로 복귀 시) — FS-022</li>
+</ul>
+<h2 id="5a-ds-040">5a. 배포·보안 아키텍처 (DS-040)</h2>
+<p>자세 A(인터넷 ON) 배포 형상과 그 보안 통제를 정의한다(FS-050~052, URS-050~052).</p>
+<pre><code>                 ┌─ 인터넷 ── KRISS(time.kriss.re.kr)
+                 │   ▲  아웃바운드 UDP 123 ONLY (egress 화이트리스트)
+[모니터링 PC] ───┤
+ (전용 호스트)   │   내부망(단일 L3, ping 가능)
+ 앱=localhost    └─ NTP 질의(mode3, 읽기) ──&gt; 인터넷서버 / AD서버 / 장비1~5
+   바인딩            (출발지=모니터링 PC IP, 목적지 123, 단방향)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>통제 항목</th>
+<th>설계</th>
+<th>근거 위험</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Egress 제한</td>
+<td>아웃바운드 방화벽: <code>time.kriss.re.kr:123/udp</code>만 허용, 그 외 인터넷 차단. 인바운드 인터넷 차단</td>
+<td>RISK-007</td>
+</tr>
+<tr>
+<td>앱 바인딩</td>
+<td>uvicorn <code>--host 127.0.0.1</code>(기본) 또는 내부 IP, 노출 시 인증 게이트</td>
+<td>RISK-008</td>
+</tr>
+<tr>
+<td>읽기 전용</td>
+<td><code>ntplib</code> 클라이언트 요청(mode 3)만 사용. 시각 설정·mode 6/7 미구현</td>
+<td>RISK-011</td>
+</tr>
+<tr>
+<td>방화벽 규칙 최소화</td>
+<td>대역 간 규칙은 출발지=모니터링 PC IP, 목적지 포트=123 단방향으로 한정</td>
+<td>RISK-010</td>
+</tr>
+<tr>
+<td>기준 무결성</td>
+<td>다중 샘플 중앙값 + 범위 검증, stratum 확인</td>
+<td>RISK-009</td>
+</tr>
+<tr>
+<td>호스트 격리</td>
+<td>감시 전용 호스트(겸용 금지), 최소 권한, 패치/백신</td>
+<td>RISK-007</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>감시자(모니터링 PC)와 피감시자(장비·시간서버)를 분리한다. 시스템은 장비에 쓰기를 하지 않으므로 장비 검증상태·GxP 데이터에 영향을 주지 않는다.</p>
+</blockquote>
+<h2 id="6-iq">6. 기술/구성 항목 (IQ 대상)</h2>
+<table>
+<thead>
+<tr>
+<th>구성 항목</th>
+<th>값/버전</th>
+<th>검증</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Python</td>
+<td>≥ 3.11</td>
+<td>IQ</td>
+</tr>
+<tr>
+<td>FastAPI / uvicorn</td>
+<td>requirements.txt 고정</td>
+<td>IQ</td>
+</tr>
+<tr>
+<td>Node.js</td>
+<td>≥ 20</td>
+<td>IQ</td>
+</tr>
+<tr>
+<td>DB 연결 문자열</td>
+<td>환경변수 <code>NTP_DATABASE_URL</code>(기본 SQLite <code>pharma_ntp.sqlite3</code>)</td>
+<td>IQ</td>
+</tr>
+<tr>
+<td>NTP 소스 도달성</td>
+<td>구성된 source_host</td>
+<td>IQ</td>
+</tr>
+</tbody>
+</table>
+</section><section id="doc-04" class="doc">
+<h1 id="risk-assessment-ra">위험 평가 (Risk Assessment, RA)</h1>
+<table>
+<thead>
+<tr>
+<th>항목</th>
+<th>내용</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>문서 ID</td>
+<td>RISK-001</td>
+</tr>
+<tr>
+<td>버전</td>
+<td>0.1 (Draft)</td>
+</tr>
+<tr>
+<td>방법</td>
+<td>GxP 영향도 × 발생가능성 × 검출성 (GAMP 5 위험 기반)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="1">1. 목적</h2>
+<p>기능별 GxP 위험을 평가하여 검증 노력의 우선순위를 정한다. 위험도 High 항목은 OQ/PQ에서 집중 검증한다.</p>
+<h2 id="2">2. 평가 척도</h2>
+<ul>
+<li><strong>심각도(S)</strong>: 1(낮음)~3(높음) — 환자 안전/제품 품질/데이터 무결성 영향</li>
+<li><strong>가능성(P)</strong>: 1~3 — 발생 빈도</li>
+<li><strong>검출성(D)</strong>: 1(쉬움)~3(어려움) — 발생 시 발견 난이도</li>
+<li><strong>위험도(RPN)</strong> = S × P × D</li>
+</ul>
+<h2 id="3">3. 위험 항목</h2>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>위험 시나리오</th>
+<th>관련 FS</th>
+<th>S</th>
+<th>P</th>
+<th>D</th>
+<th>RPN</th>
+<th>등급</th>
+<th>완화책</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RISK-001</td>
+<td>오프셋 한계 초과를 경고하지 못함 → 잘못된 타임스탬프가 GxP 기록에 유입</td>
+<td>FS-022</td>
+<td>3</td>
+<td>2</td>
+<td>3</td>
+<td>18</td>
+<td>High</td>
+<td>OQ에서 경계값 테스트, 경고 로직 단위 테스트 필수</td>
+</tr>
+<tr>
+<td>RISK-002</td>
+<td>표준(허용 한계) 값이 무단 변경됨</td>
+<td>FS-002</td>
+<td>3</td>
+<td>1</td>
+<td>2</td>
+<td>6</td>
+<td>Med</td>
+<td>버전 증가 + 변경 이력(값 스냅샷·사유) 기록(구현), 추후 인증·전자서명</td>
+</tr>
+<tr>
+<td>RISK-003</td>
+<td>폴링 워커 중단으로 오프셋이 최신화되지 않음</td>
+<td>FS-020</td>
+<td>2</td>
+<td>2</td>
+<td>3</td>
+<td>12</td>
+<td>High</td>
+<td>last_sync 노후 감지, 워커 헬스체크(OQ)</td>
+</tr>
+<tr>
+<td>RISK-004</td>
+<td>잘못된 NTP 소스 측정값(네트워크 지연)으로 오탐</td>
+<td>FS-020</td>
+<td>2</td>
+<td>2</td>
+<td>2</td>
+<td>8</td>
+<td>Med</td>
+<td>다중 샘플 평균, stratum 검증</td>
+</tr>
+<tr>
+<td>RISK-005</td>
+<td>검증 산출물 상태가 승인 절차 없이 전이됨</td>
+<td>FS-031</td>
+<td>2</td>
+<td>1</td>
+<td>2</td>
+<td>4</td>
+<td>Low</td>
+<td>상태 전이 규칙 강제</td>
+</tr>
+<tr>
+<td>RISK-006</td>
+<td>감사 추적 누락/변조</td>
+<td>FS-040</td>
+<td>3</td>
+<td>1</td>
+<td>3</td>
+<td>9</td>
+<td>Med</td>
+<td><strong>전체 감사 추적 범위 제외(2026-06-20)</strong> — 데이터 무결성 직결 핵심 이벤트인 한계 초과를 로그로 기록(FS-023)하여 부분 완화. 실 규제 적용 시 Part 11 별도 검토</td>
+</tr>
+<tr>
+<td>RISK-007</td>
+<td>모니터링 PC가 인터넷·폐쇄망 양쪽에 연결되어, 감염 시 폐쇄망 침투 발판(pivot)이 됨</td>
+<td>FS-050</td>
+<td>3</td>
+<td>2</td>
+<td>3</td>
+<td>18</td>
+<td>High</td>
+<td>아웃바운드를 KRISS UDP 123만 화이트리스트, 인바운드 인터넷 차단, 전용 호스트·최소권한, 앱 내부 바인딩(OQ-050)</td>
+</tr>
+<tr>
+<td>RISK-008</td>
+<td>무인증 대시보드/API가 사내망에 노출되어 무단 조회·조작</td>
+<td>FS-050</td>
+<td>2</td>
+<td>2</td>
+<td>2</td>
+<td>8</td>
+<td>Med</td>
+<td>localhost/내부 바인딩, 인증, 읽기 전용 설계(OQ-052)</td>
+</tr>
+<tr>
+<td>RISK-009</td>
+<td>KRISS 경로 NTP 스푸핑으로 기준 시각이 오염되어 오탐/미탐</td>
+<td>FS-052</td>
+<td>2</td>
+<td>2</td>
+<td>3</td>
+<td>12</td>
+<td>Med</td>
+<td>다중 샘플 중앙값, 범위 검증, stratum 확인, 이상 시 synced=false</td>
+</tr>
+<tr>
+<td>RISK-010</td>
+<td>대역 간 방화벽 규칙 과다 개방으로 폐쇄망 격리 약화</td>
+<td>FS-050</td>
+<td>2</td>
+<td>1</td>
+<td>2</td>
+<td>4</td>
+<td>Low</td>
+<td>출발지=모니터링 PC IP, 목적지 포트 123 단방향 최소 규칙</td>
+</tr>
+<tr>
+<td>RISK-011</td>
+<td>장비 NTP 서버 활성화로 장비 공격 표면 확대</td>
+<td>FS-051</td>
+<td>2</td>
+<td>1</td>
+<td>2</td>
+<td>4</td>
+<td>Low</td>
+<td>UDP 123 읽기 한정, 응답 허용 IP를 모니터링 PC로 제한</td>
+</tr>
+</tbody>
+</table>
+<h2 id="4">4. 등급 기준</h2>
+<table>
+<thead>
+<tr>
+<th>RPN</th>
+<th>등급</th>
+<th>검증 강도</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>≥ 14</td>
+<td>High</td>
+<td>OQ + PQ 집중, 단위 테스트 필수</td>
+</tr>
+<tr>
+<td>6 ~ 13</td>
+<td>Med</td>
+<td>OQ 표준 테스트</td>
+</tr>
+<tr>
+<td>&lt; 6</td>
+<td>Low</td>
+<td>기능 확인 수준</td>
+</tr>
+</tbody>
+</table>
+<h2 id="5">5. 결론</h2>
+<p>High 등급(RISK-001, RISK-003)은 경고 로직과 폴링 워커 신뢰성에 집중된다. 해당 기능의 단위 테스트와 OQ 경계값 테스트를 우선 구현한다.</p>
+<p>보안 측면 High 등급 <strong>RISK-007</strong>(인터넷↔폐쇄망 피벗)은 자세 A 배포의 핵심 잔여 위험으로, egress 화이트리스트·전용 호스트·내부 바인딩으로 완화하며 <strong>OQ-050에서 현장 검증</strong>한다. 이 시스템은 장비에 쓰기를 하지 않는 <strong>읽기 전용 관찰자</strong>이므로 장비 데이터·검증상태에는 영향을 주지 않는다(RISK-011 Low).</p>
+</section><section id="doc-05" class="doc">
+<h1 id="utck-reference-standard-analysis">UTCk 기준 표준 분석 (Reference Standard Analysis)</h1>
+<table>
+<thead>
+<tr>
+<th>항목</th>
+<th>내용</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>문서 ID</td>
+<td>REF-001</td>
+</tr>
+<tr>
+<td>버전</td>
+<td>0.1 (Draft)</td>
+</tr>
+<tr>
+<td>작성일</td>
+<td>2026-06-20</td>
+</tr>
+<tr>
+<td>V 모델 대응</td>
+<td>URS-001(기준 표준)의 근거, OQ §3 / PQ §3(UTCk 교차점검)의 전제</td>
+</tr>
+</tbody>
+</table>
+<h2 id="1">1. 목적</h2>
+<p>본 시스템은 신뢰 시간 기준으로 <strong>KRISS UTC(k)</strong> 를 채택하고, 공식 프로그램 <strong>UTCk</strong>를 <em>참조 기준</em>으로 "인용"한다(<a href="#doc-01">URS-001</a>). 이 인용이 데이터 무결성의 근거가 되려면, <strong>UTCk가 실제로 어떤 알고리즘으로 동작하는지</strong>를 규명하고 본 시스템의 측정이 그에 <strong>정합(conformance)</strong> 함을 입증해야 한다. 본 문서가 그 규명·정합 근거를 제공한다.</p>
+<h2 id="2-utck">2. UTCk 규명</h2>
+<table>
+<thead>
+<tr>
+<th>항목</th>
+<th>규명 내용</th>
+<th>근거</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>제공자</td>
+<td>한국표준과학연구원(KRISS) 공식 시각 동기화 프로그램</td>
+<td>KRISS 공식 페이지</td>
+</tr>
+<tr>
+<td>분석 버전</td>
+<td><strong>4.1.0.2</strong> (로컬 <code>UTCk/version.txt</code>), 공개 라인업은 UTCk 4 (2026-02-01 정식 운영)</td>
+<td>로컬 바이너리 / 보도</td>
+</tr>
+<tr>
+<td>프로토콜</td>
+<td><strong>SNTP(Simple Network Time Protocol)</strong> — NTP의 단순화 부분집합. UTC(KRISS) Time Server에 접속</td>
+<td>KRISS "주요기능" 페이지</td>
+</tr>
+<tr>
+<td>바이너리 성격</td>
+<td>Windows <strong>MFC 기반 GUI</strong> 실행파일(6.7MB). 추출 문자열에 <code>NTP</code> 확인</td>
+<td>로컬 <code>UTCk.exe</code> 문자열 분석</td>
+</tr>
+<tr>
+<td>기준 소스</td>
+<td>UTC(KRISS) = KRISS가 유지하는 협정세계시 실현. NTP 엔드포인트 <code>time.kriss.re.kr</code> 계열</td>
+<td>KRISS / URS-001</td>
+</tr>
+<tr>
+<td>동작</td>
+<td><code>[비교]</code> 표준시와 PC 시각 차이 표시 → <code>[동기]</code> PC 시계를 표준시로 보정(step). 자동 접속 권장 간격 ≥ 30분</td>
+<td>KRISS "주요기능"</td>
+</tr>
+<tr>
+<td>정밀도(불확도)</td>
+<td>UTCk 3.1: ≤ <strong>0.5초</strong> → UTCk 4: ≤ <strong>0.1초</strong>(서버 클라우드 이관, 시간당 ~4,500만 건 처리)</td>
+<td>KRISS / 보도</td>
+</tr>
+</tbody>
+</table>
+<h3 id="21-ntpsntp">2.1 핵심 알고리즘 (NTP/SNTP 오프셋)</h3>
+<p>UTCk를 포함한 모든 NTP/SNTP 클라이언트는 4개 타임스탬프로 오프셋·지연을 계산한다(RFC 5905 / SNTP RFC 4330).</p>
+<pre><code>T1 = 클라이언트 송신 시각      T2 = 서버 수신 시각
+T3 = 서버 응답 송신 시각       T4 = 클라이언트 수신 시각
+
+오프셋 θ = ((T2 − T1) + (T3 − T4)) / 2
+왕복지연 δ = (T4 − T1) − (T3 − T2)
+</code></pre>
+<p>UTCk의 동기화는 이 θ만큼 로컬 OS 시계를 보정하는 것이고, 측정/비교는 θ를 표시하는 것이다.</p>
+<h2 id="3-conformance-basis">3. 본 시스템과의 정합성 (Conformance Basis)</h2>
+<table>
+<thead>
+<tr>
+<th>관점</th>
+<th>UTCk (참조 기준)</th>
+<th>pharma-ntp-standard</th>
+<th>정합</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>프로토콜</td>
+<td>SNTP/NTP</td>
+<td>NTP v3 (<code>ntplib</code>)</td>
+<td>✅ 동일 계열</td>
+</tr>
+<tr>
+<td>기준 소스</td>
+<td>UTC(KRISS) <code>time.kriss.re.kr</code></td>
+<td>동일 (<code>source_host</code> 기본값)</td>
+<td>✅ 동일</td>
+</tr>
+<tr>
+<td>오프셋 산식</td>
+<td>θ = ((T2−T1)+(T3−T4))/2</td>
+<td><code>ntplib</code> 동일 산식(<code>resp.offset</code>)</td>
+<td>✅ 동일</td>
+</tr>
+<tr>
+<td>샘플링</td>
+<td>SNTP 단일 샘플</td>
+<td>다중 샘플 <strong>중앙값</strong>(기본 3)</td>
+<td>✅ 동등 이상(<a href="#doc-04">RISK-004</a> 완화)</td>
+</tr>
+<tr>
+<td>stratum</td>
+<td>서버 stratum 수신</td>
+<td><code>resp.stratum</code> 수신·검증</td>
+<td>✅ 동일</td>
+</tr>
+<tr>
+<td><strong>역할</strong></td>
+<td>OS 시계를 <strong>보정(step)</strong></td>
+<td>오프셋을 <strong>모니터링·경고</strong></td>
+<td>⚠️ <strong>의도된 차이</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>결론:</strong> 본 시스템은 UTCk와 <strong>동일한 프로토콜·동일한 기준 소스·동일한 오프셋 산식</strong>으로 시각 편차를 측정한다. 차이는 "시계를 고치느냐(UTCk) / 편차를 감시·경고하느냐(본 시스템)"의 <strong>역할</strong>뿐이며, 이는 GxP 모니터링·검증 도구로서 의도된 설계다. 따라서 본 시스템은 <strong>"공식 UTCk에 <em>준하는</em>(conformant-to) 측정 기준"</strong> 을 사용한다고 입증할 수 있다.</p>
+<blockquote>
+<p>실측 확인(2026-06-20): <code>time.kriss.re.kr</code> 질의 성공 — offset ≈ −1.35ms, stratum 3. 기준 소스 도달성(<a href="#doc-07">IQ-007</a>) 및 측정 가능성 확인됨.</p>
+</blockquote>
+<h2 id="4-utck">4. "UTCk에 준함"의 입증 절차</h2>
+<p>본 규명을 실제 검증으로 닫는 두 단계는 이미 프로토콜에 정의되어 있다.</p>
+<ul>
+<li><strong><a href="#doc-08">OQ §3</a></strong> — 수집된 시스템 기준 시각을 UTCk가 표시하는 KRISS 시각과 비교(차이 ≤ 표준 허용 한계).</li>
+<li><strong><a href="#doc-09">PQ §3</a></strong> — 실 운영에서 본 시스템 보고 시각과 공식 UTCk 표시 시각을 <strong>동시 측정·비교</strong>하여 정합 입증.</li>
+</ul>
+<h2 id="5">5. 한계 및 주의</h2>
+<ul>
+<li>본 프로젝트는 <strong>공식 인증 제품이 아니며</strong>, UTCk를 <em>참조 기준</em>으로 인용한 오픈소스 구현이다.</li>
+<li><code>UTCk.exe</code>는 <strong>타사(KRISS) 바이너리</strong>로 저장소에 포함하지 않는다(<code>.gitignore</code>). 교차점검은 로컬 설치본을 사용한다.</li>
+<li>측정은 네트워크 도달성에 의존한다(<a href="#doc-04">RISK-003</a>: 폴링 중단 감지로 완화).</li>
+<li>UTCk 4의 SNTP 세부(샘플 수·필터·재시도)는 공개 사양이 제한적이므로, 정합 입증은 <strong>산식·소스·프로토콜의 동일성</strong>과 <strong>교차점검 실측 결과</strong>로 갈음한다.</li>
+</ul>
+<h2 id="_1">출처</h2>
+<ul>
+<li>KRISS 표준시각 맞추기(주요기능): https://www.kriss.re.kr/menu.es?mid=a10305020000</li>
+<li>KRISS 표준시각 맞추기(개요): https://www.kriss.re.kr/menu.es?mid=a10305000000</li>
+<li>"수강신청 '0.01초' 싸움…KRISS 'UTCk 4' 공개": https://v.daum.net/v/xDPjDDLxi9</li>
+<li>UTCk — 나무위키: https://namu.wiki/w/UTCk</li>
+<li>로컬 바이너리: <code>UTCk/UTCk.exe</code> (v4.1.0.2), 문자열 분석</li>
+</ul>
+</section><section id="doc-06" class="doc">
+<h1 id="requirements-traceability-matrix-rtm">추적성 매트릭스 (Requirements Traceability Matrix, RTM)</h1>
+<table>
+<thead>
+<tr>
+<th>항목</th>
+<th>내용</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>문서 ID</td>
+<td>RTM-001</td>
+</tr>
+<tr>
+<td>버전</td>
+<td>0.1 (Draft)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="1">1. 목적</h2>
+<p>V 모델 좌측(요구사항·설계)과 우측(검증)을 양방향으로 연결하여, 모든 요구사항이 구현·검증되었음을 입증한다.</p>
+<h2 id="2-urs-fs-ds">2. 추적성 (URS → FS → DS → 검증)</h2>
+<table>
+<thead>
+<tr>
+<th>URS</th>
+<th>FS</th>
+<th>DS</th>
+<th>위험</th>
+<th>검증(IQ/OQ/PQ)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>URS-001 표준 정의</td>
+<td>FS-001</td>
+<td>DS-010, DS-020</td>
+<td>RISK-002</td>
+<td>OQ-001, PQ-001</td>
+</tr>
+<tr>
+<td>URS-002 표준 파라미터</td>
+<td>FS-001</td>
+<td>DS-010</td>
+<td>RISK-002</td>
+<td>OQ-001</td>
+</tr>
+<tr>
+<td>URS-003 표준 버전관리</td>
+<td>FS-002</td>
+<td>DS-010</td>
+<td>RISK-002</td>
+<td>OQ-002</td>
+</tr>
+<tr>
+<td>URS-010 장비 등록</td>
+<td>FS-010</td>
+<td>DS-010, DS-020</td>
+<td>—</td>
+<td>OQ-010, OQ-026, OQ-027</td>
+</tr>
+<tr>
+<td>URS-011 GxP 분류</td>
+<td>FS-011</td>
+<td>DS-010</td>
+<td>—</td>
+<td>OQ-010</td>
+</tr>
+<tr>
+<td>URS-012 정책 할당</td>
+<td>FS-012</td>
+<td>DS-010</td>
+<td>—</td>
+<td>OQ-011</td>
+</tr>
+<tr>
+<td>URS-020 오프셋 수집</td>
+<td>FS-020, FS-024</td>
+<td>DS-001, DS-010</td>
+<td>RISK-003, RISK-004</td>
+<td>OQ-020, OQ-024, OQ-025, PQ-002</td>
+</tr>
+<tr>
+<td>URS-021 대시보드</td>
+<td>FS-021</td>
+<td>DS-020</td>
+<td>—</td>
+<td>OQ-021, PQ-003</td>
+</tr>
+<tr>
+<td>URS-022 한계 경고</td>
+<td>FS-022</td>
+<td>DS-030</td>
+<td>RISK-001</td>
+<td>OQ-022</td>
+</tr>
+<tr>
+<td>URS-023 경고 이력</td>
+<td>FS-023</td>
+<td>DS-010</td>
+<td>—</td>
+<td>OQ-023, OQ-028</td>
+</tr>
+<tr>
+<td>URS-030 산출물 관리</td>
+<td>FS-030</td>
+<td>DS-010, DS-020</td>
+<td>—</td>
+<td>OQ-030</td>
+</tr>
+<tr>
+<td>URS-031 승인 워크플로우</td>
+<td>FS-031</td>
+<td>DS-030</td>
+<td>RISK-005</td>
+<td>OQ-031</td>
+</tr>
+<tr>
+<td>URS-032 산출물-요구 연결</td>
+<td>FS-032</td>
+<td>DS-010</td>
+<td>—</td>
+<td>OQ-032</td>
+</tr>
+<tr>
+<td>URS-040 감사 추적</td>
+<td>FS-040</td>
+<td>DS-010</td>
+<td>RISK-006</td>
+<td>OQ-040</td>
+</tr>
+<tr>
+<td>URS-041 시스템 시각</td>
+<td>FS-041, FS-042</td>
+<td>DS-001, DS-020</td>
+<td>—</td>
+<td>IQ-005, OQ-041, OQ-042</td>
+</tr>
+<tr>
+<td>URS-050 폐쇄망 격리·egress 제한</td>
+<td>FS-050, FS-052</td>
+<td>DS-040</td>
+<td>RISK-007, RISK-009, RISK-010</td>
+<td>OQ-050</td>
+</tr>
+<tr>
+<td>URS-051 장비 읽기 전용</td>
+<td>FS-051</td>
+<td>DS-040</td>
+<td>RISK-011</td>
+<td>OQ-051</td>
+</tr>
+<tr>
+<td>URS-052 접근 통제(바인딩·인증)</td>
+<td>FS-050</td>
+<td>DS-040</td>
+<td>RISK-008</td>
+<td>OQ-052</td>
+</tr>
+</tbody>
+</table>
+<h2 id="3-reg-001">3. 외부 규제·모범사례 근거 (REG-001)</h2>
+<p><a href="#doc-11">REG-001</a>은 각 모범사례(BP-n)를 아래 요구사항에 정합 매핑하여, URS의 외부 정당화 근거를 제공한다(상세 매핑은 REG-001 §5).</p>
+<table>
+<thead>
+<tr>
+<th>모범사례(REG-001)</th>
+<th>근거가 되는 URS</th>
+<th>관련 위험</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>BP-1 신뢰 시간 소스</td>
+<td>URS-001</td>
+<td>RISK-002</td>
+</tr>
+<tr>
+<td>BP-2 이중화</td>
+<td>(신규 후보 — 미할당)</td>
+<td>RISK-003</td>
+</tr>
+<tr>
+<td>BP-3 UTC·타임존</td>
+<td>URS-041</td>
+<td>—</td>
+</tr>
+<tr>
+<td>BP-4 드리프트·폴링</td>
+<td>URS-020, URS-022</td>
+<td>RISK-001, RISK-003, RISK-004</td>
+</tr>
+<tr>
+<td>BP-5 변조방지·접근통제</td>
+<td>URS-003, URS-040, URS-050, URS-051, URS-052</td>
+<td>RISK-002, RISK-006, RISK-007, RISK-008</td>
+</tr>
+<tr>
+<td>BP-6 검증(CSV)</td>
+<td>URS-001, URS-021</td>
+<td>RISK-001</td>
+</tr>
+<tr>
+<td>BP-7 거버넌스</td>
+<td>URS-030, URS-031</td>
+<td>RISK-005</td>
+</tr>
+</tbody>
+</table>
+<h2 id="4">4. 커버리지 점검</h2>
+<ul>
+<li>[x] 모든 URS 항목이 1개 이상의 FS로 전개됨</li>
+<li>[x] 모든 FS 항목이 1개 이상의 DS로 설계됨</li>
+<li>[x] 모든 High 위험이 OQ/PQ 테스트로 연결됨 (RISK-007은 OQ-050, 현장 실행 범위)</li>
+<li>[x] 모든 URS 항목이 1개 이상의 OQ/PQ로 검증됨 (보안·성능 일부는 현장 배포 범위)</li>
+<li>[ ] 모든 REG-001 모범사례(BP-n)가 1개 이상의 URS로 매핑됨 (BP-2 이중화는 미할당 — 후속 증분)</li>
+</ul>
+<blockquote>
+<p>High 위험 RISK-007(인터넷↔폐쇄망 피벗)은 OQ-050으로 연결되며, 배포 네트워크 환경 의존으로 <strong>현장 실행 예정</strong>(개발 증분에서는 DS-040 설계·통제 정의까지 완료).</p>
+<p>본 매트릭스는 산출물 변경 시 함께 갱신한다. 추후 백엔드의 <code>Deliverable.requirement_tags</code>로 일부 자동화 가능.</p>
+</blockquote>
+</section><section id="doc-07" class="doc">
+<h1 id="installation-qualification-iq">설치 적격성 (Installation Qualification, IQ)</h1>
+<table>
+<thead>
+<tr>
+<th>항목</th>
+<th>내용</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>문서 ID</td>
+<td>IQ-001</td>
+</tr>
+<tr>
+<td>버전</td>
+<td>0.1 (Draft)</td>
+</tr>
+<tr>
+<td>V 모델 대응</td>
+<td>설계 명세(DS)</td>
+</tr>
+<tr>
+<td>전제</td>
+<td><a href="#doc-03">DS</a> §6 구성 항목</td>
+</tr>
+</tbody>
+</table>
+<h2 id="1">1. 목적</h2>
+<p>시스템이 명세된 환경에 올바르게 설치·구성되었음을 입증한다.</p>
+<h2 id="2">2. 테스트 케이스</h2>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>검증 항목</th>
+<th>절차</th>
+<th>기대 결과</th>
+<th>결과</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>IQ-001</td>
+<td>Python 버전</td>
+<td><code>python --version</code></td>
+<td>≥ 3.11</td>
+<td>✅ PASS — Python 3.11.2</td>
+</tr>
+<tr>
+<td>IQ-002</td>
+<td>백엔드 의존성 설치</td>
+<td><code>pip install -r requirements.txt</code></td>
+<td>오류 없이 완료</td>
+<td>✅ PASS — fastapi 0.137.2 등 import 성공</td>
+</tr>
+<tr>
+<td>IQ-003</td>
+<td>Node 버전</td>
+<td><code>node --version</code></td>
+<td>≥ 20</td>
+<td>✅ PASS — v24.15.0</td>
+</tr>
+<tr>
+<td>IQ-004</td>
+<td>프런트 의존성 설치</td>
+<td><code>npm install</code></td>
+<td>오류 없이 완료</td>
+<td>✅ PASS — node_modules 존재</td>
+</tr>
+<tr>
+<td>IQ-005</td>
+<td>백엔드 기동</td>
+<td><code>uvicorn app.main:app</code> 후 <code>GET /api/health</code></td>
+<td><code>200 {"status":"ok"}</code></td>
+<td>✅ PASS — <code>test_health</code> 통과(200, status=ok)</td>
+</tr>
+<tr>
+<td>IQ-006</td>
+<td>DB 연결</td>
+<td>기동 시 마이그레이션/테이블 생성</td>
+<td>테이블 생성 확인</td>
+<td>✅ PASS — 기동 시 <code>init_db()</code>가 SQLAlchemy 테이블 생성, SQLite 영속(<code>pharma_ntp.sqlite3</code>); 재시작 후 데이터 유지(OQ-028 연계)</td>
+</tr>
+<tr>
+<td>IQ-007</td>
+<td>NTP 소스 도달성</td>
+<td>구성된 <code>source_host</code>로 NTP 질의</td>
+<td>응답 수신</td>
+<td>✅ PASS — <code>time.kriss.re.kr</code> 응답, stratum 3, offset ≈ −3.07ms</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>실행 기록: 2026-06-20 / 실행자: 개발(자동화) / 백엔드 테스트 스위트 <code>pytest</code> 27건 전체 통과.</p>
+</blockquote>
+<h2 id="3">3. 합격 기준</h2>
+<p>모든 IQ 케이스 통과. 일탈 발생 시 <a href="#4-일탈">일탈 기록</a> 및 품질 검토.
+→ <strong>결과: 전 항목 PASS. IQ-006(DB 연결)은 SQLAlchemy/SQLite 영속 저장소 구현으로 검증 완료(일탈 #1 종료).</strong></p>
+<h2 id="4">4. 일탈</h2>
+<table>
+<thead>
+<tr>
+<th>일탈 #</th>
+<th>케이스</th>
+<th>내용</th>
+<th>조치</th>
+<th>상태</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>IQ-006</td>
+<td>(해소됨) 초기 증분은 인메모리 골격이라 DB 연결 검증 대상이 없었음</td>
+<td>SQLAlchemy(SQLite) 전환 완료 후 IQ-006 재실행 → PASS</td>
+<td><strong>Closed(2026-06-21)</strong></td>
+</tr>
+</tbody>
+</table>
+<h2 id="5">5. 승인</h2>
+<table>
+<thead>
+<tr>
+<th>역할</th>
+<th>이름</th>
+<th>서명</th>
+<th>일자</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>실행</td>
+<td>(자동화)</td>
+<td>—</td>
+<td>2026-06-20</td>
+</tr>
+<tr>
+<td>검토(QA)</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</section><section id="doc-08" class="doc">
+<h1 id="operational-qualification-oq">운영 적격성 (Operational Qualification, OQ)</h1>
+<table>
+<thead>
+<tr>
+<th>항목</th>
+<th>내용</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>문서 ID</td>
+<td>OQ-001</td>
+</tr>
+<tr>
+<td>버전</td>
+<td>0.1 (Draft)</td>
+</tr>
+<tr>
+<td>V 모델 대응</td>
+<td>기능 명세(FS)</td>
+</tr>
+<tr>
+<td>전제</td>
+<td>IQ 통과</td>
+</tr>
+</tbody>
+</table>
+<h2 id="1">1. 목적</h2>
+<p>시스템이 <a href="#doc-02">FS</a>에 명세된 기능을 의도대로 수행함을 입증한다. High 위험(<a href="#doc-04">RA</a>) 기능은 경계값을 포함해 집중 검증한다.</p>
+<h2 id="2">2. 테스트 케이스</h2>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>검증 기능(FS)</th>
+<th>절차</th>
+<th>기대 결과</th>
+<th>결과</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OQ-001</td>
+<td>표준 생성/조회 (FS-001)</td>
+<td>표준 생성(<code>time.kriss.re.kr</code>, 한계 1000ms) 후 조회</td>
+<td>입력대로 저장·조회됨</td>
+<td>✅ PASS — 라이브 생성·조회</td>
+</tr>
+<tr>
+<td>OQ-002</td>
+<td>표준 버전 증가·변경 이력 (FS-002)</td>
+<td>표준 수정(사유 포함) 후 이력 조회</td>
+<td>version +1, 버전별 변경 이력(값 스냅샷·사유) 기록</td>
+<td>✅ PASS — <code>test_oq002_standard_change_history</code>: v1(최초 생성)→v2(사유 "한계 강화") 기록, <code>GET /standards/{id}/history</code>·화면 표 동작. 행위자는 인증 부재로 <code>system</code>(한계)</td>
+</tr>
+<tr>
+<td>OQ-010</td>
+<td>장비 등록/분류 (FS-010/011)</td>
+<td>장비 등록, gxp_critical=true</td>
+<td>목록에 표시, 분류 저장</td>
+<td>✅ PASS — 라이브 등록, gxp_critical=true 저장</td>
+</tr>
+<tr>
+<td>OQ-026</td>
+<td>응답 검증 등록 (FS-010)</td>
+<td><code>validate=true</code>로 응답/무응답 호스트 각각 등록 시도</td>
+<td>응답 호스트만 201, 무응답은 422 거부</td>
+<td>✅ PASS — 라이브: 공개 NTP 20개 시도 → 16 등록/4 거부; <code>test_asset_create_no_validate_and_delete</code>(validate=false 우회)</td>
+</tr>
+<tr>
+<td>OQ-027</td>
+<td>장비 삭제 (FS-010)</td>
+<td>등록 장비 DELETE 후 재삭제</td>
+<td>1차 204, 모니터링 상태 정리, 2차 404</td>
+<td>✅ PASS — <code>test_asset_create_no_validate_and_delete</code></td>
+</tr>
+<tr>
+<td>OQ-011</td>
+<td>정책 할당 (FS-012)</td>
+<td>장비에 표준 연결</td>
+<td>연결 반영</td>
+<td>✅ PASS — standard_id 연결, 폴링에 사용</td>
+</tr>
+<tr>
+<td>OQ-020</td>
+<td>오프셋 수집·KRISS 보정 (FS-020)</td>
+<td>응답 장비 폴링(<code>POST /api/assets/{id}/poll</code>)</td>
+<td>장비 vs KRISS 보정 오프셋 생성, <code>reachable=true</code></td>
+<td>✅ PASS — <code>test_oq020_poll_per_device_corrected</code>; 라이브: time.windows.com 보정 offset +0.33ms(원시 KRISS 7673ms 상쇄), stratum 3</td>
+</tr>
+<tr>
+<td>OQ-024</td>
+<td>장비 무응답 감지 (FS-020, RISK-003)</td>
+<td>무응답 호스트(예 192.0.2.1) 폴링</td>
+<td><code>reachable=false</code>·상태 <code>UNREACHABLE</code>, 거짓 측정값 없음</td>
+<td>✅ PASS — <code>test_oq020_unreachable_*</code>; 라이브: 192.0.2.1 → UNREACHABLE, offset null</td>
+</tr>
+<tr>
+<td>OQ-025</td>
+<td>자동 폴링 스케줄러 (FS-024, RISK-003)</td>
+<td>장비 등록만 하고 수동 폴링 없이 대기</td>
+<td><code>poll_interval_s</code> 경과 시 스케줄러가 자동 측정, 대시보드 자동 갱신</td>
+<td>✅ PASS — <code>test_fs024_*</code>(due 판정·last_attempt); 라이브: tick 2s·주기 5s, 등록 직후 UNKNOWN → 무측정 대기 후 자동 OK 갱신</td>
+</tr>
+<tr>
+<td>OQ-028</td>
+<td>영속 저장 (DS-010 SQLite)</td>
+<td>표준·장비 등록 및 한계 초과 발생 후 백엔드 재시작</td>
+<td>표준·장비·한계초과 로그가 재시작 후에도 유지(DB 복원)</td>
+<td>✅ PASS — <code>test_persistence_standard_survives_new_session</code>; 라이브: 재시작 후 표준·장비 2대·로그 1건 그대로 복원</td>
+</tr>
+<tr>
+<td>OQ-021</td>
+<td>대시보드 (FS-021)</td>
+<td><code>/api/dashboard</code> 호출</td>
+<td>장비별 최신 오프셋·stratum·last_sync 반환</td>
+<td>✅ PASS — offset/stratum/last_sync/status=OK 반환</td>
+</tr>
+<tr>
+<td><strong>OQ-022a</strong></td>
+<td>한계 <strong>이내</strong> (FS-022, RISK-001)</td>
+<td>오프셋 = 한계−1ms 주입</td>
+<td>경고 <strong>미발생</strong>, 상태 OK</td>
+<td>✅ PASS — <code>test_oq022a_within_limit_no_alert</code></td>
+</tr>
+<tr>
+<td><strong>OQ-022b</strong></td>
+<td>한계 <strong>초과</strong> (FS-022, RISK-001)</td>
+<td>오프셋 = 한계+1ms 주입</td>
+<td>경고 <strong>발생</strong>, 상태 BREACH</td>
+<td>✅ PASS — <code>test_oq022b_over_limit_breach</code></td>
+</tr>
+<tr>
+<td>OQ-023</td>
+<td>한계 초과 로그·해제 (FS-023)</td>
+<td>오프셋 초과→복귀</td>
+<td>로그에 장비명·오프셋·한계 기록, OPEN→CLOSED 전이, 이력 보존</td>
+<td>✅ PASS — <code>test_oq023_*</code>·<code>test_breach_log_has_name_and_limit</code>; 라이브: 한계 5ms에서 3건 기록(OPEN 2·CLOSED 1), 화면 로그 표시</td>
+</tr>
+<tr>
+<td>OQ-030</td>
+<td>산출물 생성 (FS-030)</td>
+<td>산출물 생성</td>
+<td>저장·조회됨</td>
+<td>✅ PASS — <code>test_deliverable_*</code></td>
+</tr>
+<tr>
+<td>OQ-031</td>
+<td>상태 전이 규칙 (FS-031, RISK-005)</td>
+<td>Draft→Approved 직접 전이 시도</td>
+<td>거부(Reviewed 거쳐야 함)</td>
+<td>✅ PASS — <code>test_deliverable_invalid_transition_rejected</code>(409)</td>
+</tr>
+<tr>
+<td>OQ-040</td>
+<td>감사 추적 (FS-040, RISK-006)</td>
+<td>—</td>
+<td>—</td>
+<td>⛔ 범위 제외(2026-06-20) — 전체 감사 추적 미채택, [FS-023] 한계 초과 로그(OQ-023)로 핵심 이벤트 기록 대체</td>
+</tr>
+<tr>
+<td>OQ-041</td>
+<td>기준 시각 표시 (FS-041)</td>
+<td><code>GET /api/time</code> 호출, 대시보드 대형 시계 확인</td>
+<td><code>synced=true</code>·<code>reference_utc</code>·stratum 유효(편차 ≤ 표준 한계). NTP 불가 시 <code>synced=false</code> 폴백 표시</td>
+<td>✅ PASS — 라이브 stratum 3, offset +0.19ms, <code>reference_utc</code> 반환; 단일 샘플 실패 시 <code>synced=false</code> 폴백 동작 확인</td>
+</tr>
+<tr>
+<td>OQ-042</td>
+<td>전체화면 시계 (FS-042)</td>
+<td>전체화면 진입(버튼)·해제(ESC/✕), 장시간 표시 시 화면 절전 여부, 미검증 시 상태 표시 확인</td>
+<td>전체화면 전환 동작, Wake Lock으로 화면 유지, <code>synced=false</code>면 미검증(주황) 표시</td>
+<td>✅ PASS — 수동 UI 확인: 진입/해제·Wake Lock 동작, 동기화 상태(양호/미검증) 상시 표시(<code>clock--stale</code> 재사용)</td>
+</tr>
+<tr>
+<td>OQ-050</td>
+<td>Egress 제한 (FS-050, RISK-007)</td>
+<td>모니터링 PC에서 KRISS 외 임의 외부 주소로 통신 시도(예: 웹/타 포트) 및 KRISS UDP 123 질의</td>
+<td>KRISS:123/udp만 성공, 그 외 외부 통신·인바운드 차단</td>
+<td>⏳ 현장 범위(참조 구현 외) — 현장 방화벽 구성 후 실행. <strong>운영 승인 전 필수</strong></td>
+</tr>
+<tr>
+<td>OQ-051</td>
+<td>읽기 전용 동작 (FS-051, RISK-011)</td>
+<td>폴링 실행 전후 대상 장비의 시각·NTP 설정 비교</td>
+<td>장비 시각·설정 무변경(질의만 발생)</td>
+<td>⏳ 현장 범위(참조 구현 외) — 현장 장비 대상 실행</td>
+</tr>
+<tr>
+<td>OQ-052</td>
+<td>접근 통제 (FS-050/052, RISK-008)</td>
+<td>외부 인터페이스에서 API 접근 시도, 내부 바인딩·인증 확인</td>
+<td>외부 노출 없음, 미인증 접근 거부</td>
+<td>⏳ 현장 범위(참조 구현 외) — 배포 형상 확정 후 실행</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>추가 검증: RISK-003(폴링 중단) 완화로 last_sync 노후 시 상태 <code>STALE</code> 반환 — <code>test_risk003_stale_detection</code> PASS. 백엔드 스위트 <code>pytest</code> 27건 전체 통과.</p>
+</blockquote>
+<h2 id="3-utck">3. UTCk 교차 점검(참고)</h2>
+<p>OQ-020/021에서 수집된 시스템 기준 시각을 <strong>UTCk가 표시하는 KRISS 시각과 비교</strong>하여, 본 시스템의 기준 측정이 KRISS UTC(k)에 정합함을 보조 확인한다(차이 ≤ 표준 허용 한계).</p>
+<h2 id="4">4. 합격 기준</h2>
+<p>모든 OQ 케이스 통과(High 위험 케이스 OQ-022a/b는 필수). 일탈은 기록·평가.
+→ <strong>결과: High 위험 OQ-022a/b·OQ-023(RISK-001) 전부 PASS. 기능 케이스 전부 PASS(OQ-002 변경 이력 포함). OQ-040(전 엔터티 전체 감사 추적)만 범위 제외 결정(한계 초과 로그로 대체). 핵심 모니터링·기준 시각 표시(OQ-041)·영속 저장(OQ-028) 합격. 보안 OQ-050~052는 현장 배포 범위.</strong></p>
+<blockquote>
+<p>보안 케이스 OQ-050~052는 <strong>배포 네트워크 환경(방화벽·내부망)에 의존</strong>하므로 현장 설치 시 실행한다. 그중 High 위험 RISK-007을 검증하는 <strong>OQ-050은 운영 승인 전 필수</strong>다. 본(개발) 증분에서는 설계·통제 정의(DS-040)까지 완료, 실행은 현장으로 계획됨.</p>
+</blockquote>
+<h2 id="5">5. 일탈</h2>
+<table>
+<thead>
+<tr>
+<th>일탈 #</th>
+<th>케이스</th>
+<th>내용</th>
+<th>조치</th>
+<th>상태</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2</td>
+<td>OQ-002</td>
+<td>(해소됨) 표준 변경 이력(값 스냅샷·사유) 미생성</td>
+<td>변경 이력 테이블·API(<code>/standards/{id}/history</code>)·화면 표 구현(2026-06-21), <code>test_oq002_standard_change_history</code> PASS</td>
+<td><strong>Closed(구현 완료)</strong></td>
+</tr>
+<tr>
+<td>3</td>
+<td>OQ-040</td>
+<td>전 엔터티 전체 감사 추적 미구현</td>
+<td><strong>범위 제외 결정(2026-06-20)</strong> — 한계 초과 로그(FS-023/OQ-023)로 핵심 이벤트 기록 대체. 실 규제 적용 시 Part 11 별도 검토</td>
+<td>Closed(범위 제외)</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>일탈 #2는 변경 이력 구현으로 Closed, #3(전 엔터티 감사 추적)은 범위 제외로 Closed. 본 검증의 합격을 막는 중대 일탈은 없다.</p>
+</blockquote>
+<h2 id="6">6. 실행 기록 / 승인</h2>
+<table>
+<thead>
+<tr>
+<th>역할</th>
+<th>이름</th>
+<th>서명</th>
+<th>일자</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>실행(검증)</td>
+<td>(자동화)</td>
+<td>—</td>
+<td>2026-06-20</td>
+</tr>
+<tr>
+<td>검토(QA)</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</section><section id="doc-09" class="doc">
+<h1 id="performance-qualification-pq">성능 적격성 (Performance Qualification, PQ)</h1>
+<table>
+<thead>
+<tr>
+<th>항목</th>
+<th>내용</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>문서 ID</td>
+<td>PQ-001</td>
+</tr>
+<tr>
+<td>버전</td>
+<td>0.1 (Draft)</td>
+</tr>
+<tr>
+<td>V 모델 대응</td>
+<td>사용자 요구사항(URS)</td>
+</tr>
+<tr>
+<td>전제</td>
+<td>OQ 통과</td>
+</tr>
+</tbody>
+</table>
+<h2 id="1">1. 목적</h2>
+<p>실사용에 준하는 조건에서 시스템이 <a href="#doc-01">URS</a>를 충족함을 입증한다. 즉 "사용자가 의도한 대로, 운영 환경에서" 동작하는지 확인한다.</p>
+<h2 id="2">2. 테스트 케이스</h2>
+<blockquote>
+<p><strong>범위 안내(참조 구현):</strong> PQ는 <strong>실 운영 환경(현장 배포)에서 실행</strong>한다. 본 빌드에서는 좌측 설계와 우측 IQ/OQ(설치·기능)를 완료했으며, 아래 PQ 케이스는 현장 배포 시점에 수행한다(코드/기능 결함이 아니라 <strong>환경 의존 검증</strong>).</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>검증 요구(URS)</th>
+<th>시나리오</th>
+<th>합격 기준</th>
+<th>결과</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PQ-001</td>
+<td>표준 운영 (URS-001/002)</td>
+<td>KRISS UTC(k) 기준 표준을 실제 NTP 소스(<code>time.kriss.re.kr</code>)로 구성·운영</td>
+<td>실 소스에서 오프셋 수집 성공, UTCk 시각과 차이 ≤ 한계</td>
+<td>☐ 현장</td>
+</tr>
+<tr>
+<td>PQ-002</td>
+<td>지속 모니터링 (URS-020)</td>
+<td>대표 장비를 24시간 연속 폴링</td>
+<td>폴링 누락 없음, 드리프트 추세 기록됨</td>
+<td>☐ 현장</td>
+</tr>
+<tr>
+<td>PQ-003</td>
+<td>대시보드 성능 (URS-021)</td>
+<td>현실 규모(수십 대) 장비로 대시보드 조회</td>
+<td>응답 ≤ 1초</td>
+<td>☐ 현장</td>
+</tr>
+<tr>
+<td>PQ-004</td>
+<td>한계 초과 운영 대응 (URS-022)</td>
+<td>실제 장비 시각을 인위적 이탈</td>
+<td>경고 발생·통지, 운영자 인지 가능</td>
+<td>☐ 현장</td>
+</tr>
+<tr>
+<td>PQ-005</td>
+<td>검증 산출물 흐름 (URS-030/031)</td>
+<td>IQ→OQ→PQ 산출물을 실제 승인 흐름으로 처리</td>
+<td>상태 전이·승인 이력 정상</td>
+<td>☐ 현장</td>
+</tr>
+</tbody>
+</table>
+<h2 id="3-utck">3. UTCk 정합성 확인(핵심)</h2>
+<p>PQ-001에서 본 시스템이 보고하는 기준 시각과 <strong>공식 프로그램 UTCk가 표시하는 KRISS 시각</strong>을 동시 측정·비교한다.
+- 합격: 두 시각의 차이가 표준 허용 한계 이내
+- 본 비교로 "공식 UTCk에 <em>준하는</em>" 시각 기준을 사용함을 입증한다.</p>
+<h2 id="4">4. 합격 기준</h2>
+<p>모든 PQ 케이스 통과. 미해결 중대 일탈 없음 → 시스템 릴리스 가능(<a href="#doc-00">VP</a> §8).</p>
+<h2 id="5">5. 승인</h2>
+<table>
+<thead>
+<tr>
+<th>역할</th>
+<th>이름</th>
+<th>서명</th>
+<th>일자</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>실행(검증)</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>검토(QA)</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>승인(제품 소유자)</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</section><section id="doc-10" class="doc">
+<h1 id="kriss-validation-summary-report-kriss-traceability">KRISS 표준 정합성 검증 요약 보고서 (Validation Summary Report — KRISS Traceability)</h1>
+<table>
+<thead>
+<tr>
+<th>항목</th>
+<th>내용</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>문서 ID</td>
+<td>VSR-001</td>
+</tr>
+<tr>
+<td>버전</td>
+<td>0.1 (Draft)</td>
+</tr>
+<tr>
+<td>작성일</td>
+<td>2026-06-20</td>
+</tr>
+<tr>
+<td>V 모델 대응</td>
+<td><strong>전체 종합</strong> (좌 설계 ↔ 우 검증을 KRISS 표준 정합으로 결론)</td>
+</tr>
+<tr>
+<td>전제</td>
+<td><a href="#doc-00">VP</a>, <a href="#doc-07">IQ</a>, <a href="#doc-08">OQ</a> 실행 결과</td>
+</tr>
+</tbody>
+</table>
+<h2 id="1-claim">1. 증명 주장 (Claim)</h2>
+<blockquote>
+<p><strong>본 시스템(<code>pharma-ntp-standard</code>)이 측정·보고·감시하는 시각 기준은 한국표준과학연구원(KRISS)이 유지하는 협정세계시 실현 UTC(KRISS)이며, 그 사용은 GAMP 5 V 모델의 좌측(설계) 및 우측(검증) 산출물로 추적·입증된다.</strong></p>
+</blockquote>
+<p>본 보고서는 위 주장을 <strong>개별 증거를 인용</strong>하여 증명하고, 표준 추적 체인을 명시한다.</p>
+<h2 id="2-v">2. 증명 논리 — V 모델 양 가지의 결합</h2>
+<p>V 모델은 "무엇을 만들 것인가(좌)"와 "만든 것이 맞는가(우)"를 대칭으로 연결한다. KRISS 표준 정합은 <strong>좌측에서 KRISS를 표준으로 <em>정의</em></strong> 하고, <strong>우측에서 그 정의대로 동작함을 <em>입증</em></strong> 함으로써 증명된다.</p>
+<pre><code>[좌: KRISS를 표준으로 정의]                 [우: KRISS 표준 사용을 입증]
+URS-001 (KRISS UTC(k) 요구) ───────────────  PQ-001 / PQ §3 (UTCk 교차점검)
+   │                                              │
+REF-001 (UTCk 알고리즘 규명·정합 근거) ──────  OQ-020/021 (KRISS 라이브 실측)
+   │                                              │
+FS-001/020 (표준 소스로 측정) ──────────────  OQ-022 (한계 경고, RISK-001)
+   │                                              │
+DS-010/020 (source_host=time.kriss.re.kr) ──  IQ-007 (KRISS NTP 도달성)
+   └──────────── 구현 measure_offset() / Monitor ─────────────┘
+</code></pre>
+<h2 id="3-kriss">3. 좌측 가지 — KRISS를 표준으로 "정의"함</h2>
+<table>
+<thead>
+<tr>
+<th>산출물</th>
+<th>KRISS 표준 정의 내용</th>
+<th>근거</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="#doc-01">URS-001</a></td>
+<td>시스템의 신뢰 시간 기준을 <strong>KRISS UTC(k)</strong> 로 요구(기본 NTP 소스 <code>time.kriss.re.kr</code>), GxP 영향도 H·Must</td>
+<td>URS §3</td>
+</tr>
+<tr>
+<td><a href="#doc-05">REF-001</a></td>
+<td>인용 기준 <strong>UTCk</strong>가 SNTP/NTP로 UTC(KRISS)에 동기화함을 규명, 본 시스템과 <strong>동일 프로토콜·소스·오프셋 산식</strong>임을 정합 근거로 확립</td>
+<td>REF §2·§3</td>
+</tr>
+<tr>
+<td><a href="#doc-02">FS-001/020</a></td>
+<td>표준(신뢰 소스+파라미터) 정의 및 폴링 워커가 <strong>표준 소스에 NTP 질의</strong>해 오프셋 측정</td>
+<td>FS §2</td>
+</tr>
+<tr>
+<td><a href="#doc-03">DS-010/020</a></td>
+<td><code>TimeStandard.source_host</code> 기본값 <strong><code>time.kriss.re.kr</code></strong>, 측정은 <code>ntplib</code>(NTP)</td>
+<td>DS §3·§4</td>
+</tr>
+</tbody>
+</table>
+<p><strong>좌측 결론:</strong> 설계 전 계층에서 신뢰 시간 표준이 KRISS UTC(k)로 명시·고정되어 있으며, 인용 기준 UTCk와의 알고리즘 정합이 REF-001로 규명되었다.</p>
+<h2 id="4-kriss">4. 우측 가지 — KRISS 표준 사용을 "입증"함 (실측 증거)</h2>
+<table>
+<thead>
+<tr>
+<th>검증</th>
+<th>절차</th>
+<th>실측 결과 (2026-06-20)</th>
+<th>판정</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="#doc-07">IQ-007</a></td>
+<td>구성된 <code>source_host</code>로 NTP 질의</td>
+<td><code>time.kriss.re.kr</code> 응답, <strong>stratum 3</strong>, offset ≈ −3.07ms</td>
+<td>✅ PASS</td>
+</tr>
+<tr>
+<td><a href="#doc-08">OQ-020</a></td>
+<td>폴링 1회(<code>POST /api/assets/{id}/poll</code>)</td>
+<td>KRISS 라이브 수집, <strong>offset −0.49ms, stratum 3</strong>, OffsetSample 생성</td>
+<td>✅ PASS</td>
+</tr>
+<tr>
+<td><a href="#doc-08">OQ-021</a></td>
+<td><code>/api/dashboard</code> 조회</td>
+<td>장비별 offset·stratum·last_sync·status=OK 반환</td>
+<td>✅ PASS</td>
+</tr>
+<tr>
+<td><a href="#doc-08">OQ-022a/b</a></td>
+<td>한계 ±1ms 경계 주입(RISK-001)</td>
+<td>한계 이내 미경고/한계 초과 BREACH</td>
+<td>✅ PASS</td>
+</tr>
+<tr>
+<td><a href="#doc-09">PQ-001 / PQ §3</a></td>
+<td>본 시스템 보고 시각 ↔ 공식 UTCk 표시 시각 동시 비교</td>
+<td>(차이 ≤ 표준 허용 한계로 정합 입증)</td>
+<td>⬜ 현장 범위(배포 시 실행)</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>stratum 3 의 의미:</strong> 본 시스템이 관측한 stratum 3은 응답 서버가 KRISS의 상위(stratum 1/2) 기준 시계로부터 시간을 받는 NTP 계층의 하위 노드임을 가리킨다. 즉 측정 경로의 뿌리가 <strong>KRISS 기준 시계</strong>임을 보이는 직접 증거다.</p>
+</blockquote>
+<p><strong>우측 결론:</strong> 실제 <code>time.kriss.re.kr</code>에서 NTP 응답을 수신하고(IQ-007), 그 오프셋을 수집·표시·경고 판정(OQ-020/021/022)함이 실측으로 입증되었다. High 위험(RISK-001) 경계 검증을 포함해 통과했다.</p>
+<h2 id="5-traceability-to-standard">5. 표준 추적 체인 (Traceability to Standard)</h2>
+<p>KRISS 국가 표준에서 본 시스템의 출력까지 끊김 없는 사슬:</p>
+<pre><code>UTC(KRISS) — KRISS 원자시계 기반 협정세계시 실현 (국가 시간 표준)
+   │  NTP 시각 분배
+   ▼
+time.kriss.re.kr — KRISS NTP 서버 (관측 stratum 3 경로)
+   │  RFC 5905 오프셋 산식  θ = ((T2−T1)+(T3−T4))/2
+   ▼
+measure_offset() — ntplib NTP v3, 다중 샘플 중앙값 (RISK-004 완화)
+   │
+   ▼
+TimeStandard(source_host=&quot;time.kriss.re.kr&quot;) — 시스템 내 표준 정의
+   │
+   ▼
+OffsetSample → is_offset_breach → Alert / Dashboard — 모니터링 출력 (RISK-001)
+</code></pre>
+<p>각 단계는 §3·§4의 산출물·실측으로 뒷받침되며, REF-001이 1~3단계(KRISS↔NTP↔측정)의 알고리즘 정합을 보증한다.</p>
+<h2 id="6-conformance-statement">6. 정합성 결론 (Conformance Statement)</h2>
+<ul>
+<li>본 시스템의 시각 표준은 <strong>KRISS UTC(k)</strong> 이며, 측정은 공식 UTCk와 <strong>동일한 NTP 프로토콜·동일한 KRISS 소스·동일한 오프셋 산식</strong>으로 수행됨이 좌측 설계(URS-001, REF-001, FS, DS)와 우측 실측(IQ-007, OQ-020/021/022)으로 <strong>추적·입증</strong>되었다.</li>
+<li>따라서 본 시스템은 <strong>"공식 UTCk에 <em>준하는</em>(conformant-to) KRISS 표준 기반 NTP 시각 모니터링 체계"</strong> 임을 V 모델에 따라 증명한다.</li>
+</ul>
+<h2 id="7">7. 한계 및 미결 사항 (정직한 고지)</h2>
+<ul>
+<li>본 증명은 <strong>소프트웨어 검증(CSV) 차원의 표준 정합·추적 증명</strong>이며, 공인 교정기관의 <strong>계량학적 소급성(metrological traceability) 인증과는 별개</strong>다. 본 프로젝트는 KRISS 공식 인증 제품이 아니다(REF-001 §5).</li>
+<li><strong>PQ §3(UTCk 동시 비교)</strong> 는 <strong>현장 배포 시 실행</strong>(참조 구현 범위 외) — 완료 시 본 보고서 §4 표를 갱신해 증명을 닫는다.</li>
+<li><strong>표준 변경 이력(OQ-002)은 구현 완료</strong>(일탈 #2 Closed) — 표준 <em>값</em> 변경이 버전별 스냅샷·사유로 추적된다(RISK-002 완화). 전 엔터티 전체 감사 추적(FS-040/OQ-040)은 <strong>범위 제외</strong>(일탈 #3) — 핵심 이벤트는 한계 초과 로그(FS-023)로 기록. 인증 부재로 변경 이력의 '누가'는 <code>system</code>이며, 전자서명 기반 완전 통제는 후속이다.</li>
+<li>측정은 네트워크 도달성에 의존하며, 폴링 중단은 <code>STALE</code> 상태로 감지된다(RISK-003).</li>
+</ul>
+<h2 id="8">8. 승인</h2>
+<table>
+<thead>
+<tr>
+<th>역할</th>
+<th>이름</th>
+<th>서명</th>
+<th>일자</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>작성(검증)</td>
+<td>(자동화)</td>
+<td>—</td>
+<td>2026-06-20</td>
+</tr>
+<tr>
+<td>검토(QA)</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>승인(제품 소유자)</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2 id="_1">출처 / 참조 산출물</h2>
+<p><a href="#doc-00">VP</a> · <a href="#doc-01">URS</a> · <a href="#doc-02">FS</a> · <a href="#doc-03">DS</a> · <a href="#doc-04">RA</a> · <a href="#doc-05">REF-001</a> · <a href="#doc-06">RTM</a> · <a href="#doc-07">IQ</a> · <a href="#doc-08">OQ</a> · <a href="#doc-09">PQ</a></p>
+</section><section id="doc-11" class="doc">
+<h1 id="gxp-ntp">제약(GxP) NTP 시계 신뢰성 관리 — 규제·산업 모범사례 분석</h1>
+<table>
+<thead>
+<tr>
+<th>항목</th>
+<th>내용</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>문서 ID</td>
+<td>REG-001</td>
+</tr>
+<tr>
+<td>버전</td>
+<td>0.1 (Draft)</td>
+</tr>
+<tr>
+<td>작성일</td>
+<td>2026-06-20</td>
+</tr>
+<tr>
+<td>V 모델 대응</td>
+<td><strong>횡단(근거)</strong> — URS의 외부 정당화 근거 / 설계·검증의 모범사례 기준</td>
+</tr>
+<tr>
+<td>관계</td>
+<td><a href="#doc-05">REF-001</a>(KRISS 기준 소스 규명)의 상위 규제 맥락. <a href="#doc-06">RTM</a>으로 URS에 연결</td>
+</tr>
+</tbody>
+</table>
+<h2 id="1">1. 목적</h2>
+<p>제약(GxP) 환경에서 NTP 시간 동기화는 IT 설정이 아니라 <strong>데이터 무결성(Data Integrity)의 법적 요건</strong>이다. 전자기록의 "C(Contemporaneous, 동시성)"와 감사추적의 신뢰성이 <strong>동기화된 보안 시계</strong>에 직접 의존하기 때문이다. 본 문서는 최신 규제 동향과 산업 모범사례를 규명하고, 이를 본 시스템의 요구사항(<a href="#doc-01">URS</a>)·위험(<a href="#doc-04">RA</a>)·검증(<a href="#doc-07">IQ</a>/<a href="#doc-08">OQ</a>/<a href="#doc-09">PQ</a>)과 <strong>정합 매핑</strong>하여, 설계 결정의 외부 정당화 근거를 제공한다.</p>
+<h2 id="2-20242026">2. 최신 규제 프레임워크 (2024–2026)</h2>
+<table>
+<thead>
+<tr>
+<th>규제/지침</th>
+<th>최신 상태</th>
+<th>시간 관련 요지</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>EU GMP Annex 11 (개정 초안)</strong></td>
+<td>2025-07-07 EU·PIC/S 공동 초안 공개, 의견수렴 2025-10-11 종료, <strong>2026 중반 최종본 예상</strong></td>
+<td>14년 만의 전면 개정. 감사추적은 <strong>보안·동기화된 시계로 타임스탬프</strong>, 변조 방지(tamper-proof) 명시. GAMP 5·ICH Q9/Q10·PIC/S와 정합 강화</td>
+</tr>
+<tr>
+<td><strong>21 CFR Part 11 (FDA)</strong></td>
+<td>유효</td>
+<td><strong>보안·컴퓨터 생성·타임스탬프된 감사추적</strong> 의무 — 작업자 행위(생성/수정/삭제)를 독립 기록</td>
+</tr>
+<tr>
+<td><strong>PIC/S PI 041-1</strong></td>
+<td>2021-07-01 최종본</td>
+<td>데이터 무결성 관리 종합 지침. 동시성·소급성의 기반으로 신뢰 시계 전제</td>
+</tr>
+<tr>
+<td><strong>GAMP 5 Second Edition</strong></td>
+<td>2022 발행</td>
+<td>CSV의 사실상 표준. 시간 동기화는 인프라 자격(IQ) 항목으로 검증</td>
+</tr>
+<tr>
+<td><strong>MHRA / WHO DI 가이드</strong></td>
+<td>유효</td>
+<td>ALCOA+ 원칙, "동시성"의 전제로 시간 신뢰성 요구</td>
+</tr>
+</tbody>
+</table>
+<h2 id="3-alcoa-alcoa">3. 데이터 무결성과 시간 (ALCOA+ / ALCOA++)</h2>
+<ul>
+<li><strong>C (Contemporaneous)</strong> — 기록 시점이 실제 행위 시점과 일치 → <strong>시계 정확도가 직접 근거</strong></li>
+<li><strong>A (Attributable) / 감사추적</strong> — "누가·무엇을·<strong>언제</strong>" 중 "언제"의 신뢰성</li>
+<li><strong>ALCOA++</strong> 의 <strong>Traceable(소급성)</strong> — 시간 소스의 <strong>계량학적 소급성</strong>(국가 표준기관까지) 요구</li>
+</ul>
+<h2 id="4-ntp">4. NTP 시계 신뢰성 관리 — 모범사례 (관리 항목)</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>모범사례</th>
+<th>핵심 관리 내용</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>BP-1</td>
+<td><strong>신뢰 시간 소스</strong></td>
+<td>단일 권위 소스로 동기화(임의 인터넷 NTP 혼용 금지). 국가 표준기관(한국=KRISS <code>ntp.kriss.re.kr</code>) 소급. stratum 계층 관리</td>
+</tr>
+<tr>
+<td>BP-2</td>
+<td><strong>이중화·복원력</strong></td>
+<td>다중 시간 서버(동일 상위 기준). 외부 단절 대비 내부 마스터 클록 고려</td>
+</tr>
+<tr>
+<td>BP-3</td>
+<td><strong>UTC 기준·타임존</strong></td>
+<td>내부 기록은 UTC 저장, 표시 시 오프셋 적용. DST 모호성/시각 역전 방지. 타임존/오프셋 동반 보관</td>
+</tr>
+<tr>
+<td>BP-4</td>
+<td><strong>드리프트 관리</strong></td>
+<td>허용 편차(offset) 한계 사전 정의·문서화. 드리프트 감지·보정을 <strong>자동 로깅</strong>(언제/얼마/어떻게). 폴링 주기 표준화 및 중단 감지</td>
+</tr>
+<tr>
+<td>BP-5</td>
+<td><strong>보안·변조방지</strong></td>
+<td>시스템 시계 변경 권한 제한, 변경의 감사추적 기록(tamper-proof)</td>
+</tr>
+<tr>
+<td>BP-6</td>
+<td><strong>검증(CSV)</strong></td>
+<td>IQ(구성·도달성), OQ(측정·경고·보정 경계값), PQ(국가표준 동시 비교). 주기 재검증</td>
+</tr>
+<tr>
+<td>BP-7</td>
+<td><strong>거버넌스</strong></td>
+<td>SOP·표준 정의 문서화, 변경 이력 관리, 실패→경고+일탈 처리 연결</td>
+</tr>
+</tbody>
+</table>
+<h2 id="5-rtm">5. 정합 매핑 (본 시스템 ↔ 모범사례) — RTM 연결 근거</h2>
+<p>각 모범사례를 본 시스템의 요구사항·위험·검증·구현과 연결한다. 이 표가 <a href="#doc-06">RTM</a>의 REG-001 행을 뒷받침한다.</p>
+<table>
+<thead>
+<tr>
+<th>모범사례</th>
+<th>대응 URS</th>
+<th>대응 FS/DS</th>
+<th>위험</th>
+<th>검증</th>
+<th>현재 상태</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>BP-1 신뢰 소스</td>
+<td>URS-001</td>
+<td>FS-001 / DS-010,020</td>
+<td>RISK-002</td>
+<td>IQ-007, OQ-020</td>
+<td>⚠️ 소스 <code>time.kriss.re.kr</code>(legacy) → <code>ntp.kriss.re.kr</code> 갱신 필요</td>
+</tr>
+<tr>
+<td>BP-2 이중화</td>
+<td>(신규 후보 URS)</td>
+<td>—</td>
+<td>RISK-003</td>
+<td>—</td>
+<td>❌ 미설계 (후속 증분)</td>
+</tr>
+<tr>
+<td>BP-3 UTC·타임존</td>
+<td>URS-041</td>
+<td>FS-041 / DS-001</td>
+<td>—</td>
+<td>IQ-005</td>
+<td>⚠️ 저장 형식 점검 필요</td>
+</tr>
+<tr>
+<td>BP-4 드리프트·폴링</td>
+<td>URS-020, URS-022</td>
+<td>FS-020,022,024 / DS-001,030</td>
+<td>RISK-001,003,004</td>
+<td>OQ-020,022,025</td>
+<td>✅ 측정·경고·STALE·주기 스케줄러(FS-024) 구현 / 자동 <em>보정</em> 로깅은 비해당(읽기 전용 감시)</td>
+</tr>
+<tr>
+<td>BP-5 변조방지</td>
+<td>URS-003, URS-040</td>
+<td>FS-002,040 / DS-010</td>
+<td>RISK-002,006</td>
+<td>OQ-002,040</td>
+<td>✅ 표준 버전관리·변경 이력(값 스냅샷·사유) / ⚠️ 전 엔터티 감사추적·전자서명은 범위 제외(한계 초과 로그로 대체, who=system)</td>
+</tr>
+<tr>
+<td>BP-6 검증</td>
+<td>URS-001, URS-021</td>
+<td>—</td>
+<td>RISK-001</td>
+<td>IQ-007, OQ-021, PQ-001,003</td>
+<td>⚠️ IQ/OQ 일부 / PQ·OQ-040 미완</td>
+</tr>
+<tr>
+<td>BP-7 거버넌스</td>
+<td>URS-030, URS-031</td>
+<td>FS-030,031 / DS-010,030</td>
+<td>RISK-005</td>
+<td>OQ-030,031</td>
+<td>✅ 산출물·승인 워크플로우</td>
+</tr>
+</tbody>
+</table>
+<h2 id="6">6. 결론 및 권고</h2>
+<ul>
+<li>초기 분석의 후속 우선순위 중 <strong>영속 저장(SQLite)·주기 폴링 스케줄러(FS-024)는 구현 완료</strong>, 전체 감사추적은 <strong>범위 제외</strong>(한계 초과 로그로 대체) 결정으로 정리되었다. 남은 규제적 후속 과제는 <strong>① KRISS 소스 주소 검토(BP-1, <code>time.kriss.re.kr</code> 응답 확인됨 — 공식 권고 주소 정합 여부만 점검)</strong> 및 운영 전환 시 PostgreSQL·현장 보안 검증이다.</li>
+<li>본 문서는 <strong>소프트웨어 검증(CSV) 관점의 모범사례 정합 분석</strong>이며, 공인 교정기관의 <strong>계량학적 소급성 인증과는 별개</strong>다(<a href="#doc-05">REF-001</a> §5).</li>
+<li>개정 Annex 11 최종본(2026 중반 예상) 발효 시 본 문서를 재검토·갱신한다.</li>
+</ul>
+<h2 id="_1">출처</h2>
+<ul>
+<li>EU Commission Releases Draft Annex 11 (2025): https://www.clinicalpathwaysresearch.com/blog/2025/12/2/eu-commission-releases-draft-annex-11-computerised-systems</li>
+<li>EU GMP Annex 11 (Draft 2025) — ECA Academy: https://www.gmp-compliance.org/guidelines/gmp-guideline/eu-gmp-annex-11-draft-2025-computerised-systems</li>
+<li>EU Annex 11 in 2026 (Data Integrity) — Zamann Pharma: https://zamann-pharma.com/2026/05/07/eu-annex-11-in-year-gmp-inspection-requirements-for-data-integrity-and-computerized-systems/</li>
+<li>Automating Audit Trail Compliance for 21 CFR Part 11 &amp; Annex 11 — IntuitionLabs: https://intuitionlabs.ai/articles/audit-trails-21-cfr-part-11-annex-11-compliance</li>
+<li>Time-Stamps in 21 CFR Part 11 Audit Trails: https://www.part11compliance.com/posts/time-stamps-in-21-cfr-part-11-audit-trails</li>
+<li>PIC/S PI 041-1 Data Integrity Guidance (2021): https://picscheme.org/docview/4234</li>
+<li>ALCOA / ALCOA+ / ALCOA++ — Pharmaguideline: https://www.pharmaguideline.com/2018/12/alcoa-to-alcoa-plus-for-data-integrity.html</li>
+<li>Audit Trail Review in GxP Environments — ISPE Pharmaceutical Engineering: https://ispe.org/pharmaceutical-engineering/march-april-2026/audit-trail-review-regulation-and-practice-gxp</li>
+</ul>
+</section><section id="doc-manual" class="doc">
+<h1 id="ntp">장비 NTP 설정 확인·등록 매뉴얼 (운영 가이드)</h1>
+<table>
+<thead>
+<tr>
+<th>항목</th>
+<th>내용</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>문서 ID</td>
+<td>MAN-001</td>
+</tr>
+<tr>
+<td>버전</td>
+<td>1.0</td>
+</tr>
+<tr>
+<td>대상</td>
+<td>QC 운영자</td>
+</tr>
+<tr>
+<td>목적</td>
+<td>감시 대상 장비가 NTP 질의에 응답하도록 설정·확인하고, 본 시스템에 등록·점검하는 실무 절차</td>
+</tr>
+<tr>
+<td>관련</td>
+<td><a href="#doc-02">기능 명세 FS-010/020</a> · <a href="#doc-04">위험 RISK-011</a></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>이 문서는 검증 산출물(V 모델)이 아니라 <strong>운영 절차서</strong>입니다. 코드/설정 환경에 맞춰 현장에서 보완해 사용하세요.</p>
+</blockquote>
+<hr />
+<h2 id="1-ntp">1. 먼저, 동작 원리 한 장 (왜 NTP "응답"이 필요한가)</h2>
+<p>이 시스템(감시 PC)은 각 장비에게 <strong>"지금 네 시계로 몇 시냐?"</strong> 를 NTP로 물어봅니다.
+그 답을 KRISS 기준 시각과 비교해 장비 시계가 얼마나 벗어났는지(오프셋)를 측정합니다.</p>
+<pre><code>[감시 PC] ──&quot;몇 시?&quot;(NTP 질의, UDP 123)──▶ [장비]
+          ◀──&quot;○○:○○:○○&quot;(NTP 응답)──────
+   │
+   └─ 같은 방식으로 KRISS에도 질의 → 두 답을 비교해 (장비 vs KRISS) 오차 산출
+</code></pre>
+<p>여기서 핵심 두 가지:</p>
+<ol>
+<li><strong>장비가 NTP 질의에 "응답"해야 합니다</strong> = 장비에서 <strong>NTP 서버(시간 응답) 기능이 켜져</strong> 있어야 합니다.
+   응답하지 않으면 본 시스템에 <strong>등록 자체가 거부</strong>됩니다(아래 §6 트러블슈팅).</li>
+<li><strong>장비 자신은 신뢰 시간원에 동기화</strong>되어 있어야 합니다(사내 NTP/도메인 컨트롤러/KRISS 등).
+   본 시스템은 장비 시각을 <strong>바꾸지 않습니다</strong>(읽기 전용 감시 — RISK-011). 틀어진 시각을 <em>발견</em>해줄 뿐,
+   맞추는 것은 장비 쪽 설정의 몫입니다.</li>
+</ol>
+<hr />
+<h2 id="2">2. 사전 점검 체크리스트</h2>
+<p>장비 1대를 등록하기 전에 아래를 순서대로 확인하세요.</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>확인 항목</th>
+<th>방법</th>
+<th>통과 기준</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>장비 IP/호스트명</td>
+<td>장비 네트워크 설정</td>
+<td>고정 IP 권장</td>
+</tr>
+<tr>
+<td>2</td>
+<td>네트워크 도달</td>
+<td>감시 PC에서 <code>ping &lt;장비IP&gt;</code></td>
+<td>응답 수신</td>
+</tr>
+<tr>
+<td>3</td>
+<td>NTP 응답</td>
+<td>감시 PC에서 <code>w32tm /stripchart /computer:&lt;장비IP&gt; /dataonly /samples:3</code></td>
+<td>시각 오프셋이 출력됨(응답함)</td>
+</tr>
+<tr>
+<td>4</td>
+<td>방화벽</td>
+<td>감시 PC → 장비 <strong>UDP 123</strong> 허용</td>
+<td>차단 없음</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>3번이 실패(타임아웃)하면 장비의 NTP 서버 기능이 꺼져 있거나 방화벽에 막힌 것입니다 → §3에서 켭니다.</p>
+</blockquote>
+<hr />
+<h2 id="3-ntp">3. 장비 유형별 — NTP 응답 설정·확인</h2>
+<h3 id="31-windows-pc-hplcgc-pc">3.1 Windows PC / 워크스테이션 (HPLC·GC 제어 PC 등)</h3>
+<p>대부분의 GxP 분석기 제어 PC가 Windows입니다.</p>
+<p><strong>(A) 현재 상태 확인</strong> — 장비에서 관리자 명령 프롬프트:</p>
+<pre><code class="language-bat">w32tm /query /status          :: 동기화 상태·마지막 동기 시각
+w32tm /query /configuration   :: NTP 서버(NtpServer) 활성 여부
+</code></pre>
+<p><strong>(B) 장비를 신뢰 시간원에 동기화</strong> (장비 시각 자체가 맞아야 함):</p>
+<pre><code class="language-bat">w32tm /config /manualpeerlist:&quot;&lt;사내NTP 또는 time.kriss.re.kr&gt;&quot; /syncfromflags:manual /reliable:yes /update
+w32tm /resync
+</code></pre>
+<p><strong>(C) NTP 서버 응답(질의에 답하기) 활성화</strong> — 레지스트리:</p>
+<pre><code>HKLM\SYSTEM\CurrentControlSet\Services\W32Time\TimeProviders\NtpServer
+    Enabled = 1   (DWORD)
+HKLM\SYSTEM\CurrentControlSet\Services\W32Time\Config
+    AnnounceFlags = 5   (DWORD)
+</code></pre>
+<p>적용 후 서비스 재시작:</p>
+<pre><code class="language-bat">net stop w32time &amp;&amp; net start w32time
+</code></pre>
+<blockquote>
+<p>도메인 가입 PC는 시간 정책(GPO)이 우선될 수 있습니다. AD 도메인 컨트롤러가 시간원이면 감시 대상은 DC 또는 각 PC로 잡습니다.</p>
+</blockquote>
+<h3 id="32-linux-chrony-ntpd">3.2 Linux 시스템 (chrony / ntpd)</h3>
+<p><strong>상태 확인:</strong></p>
+<pre><code class="language-bash">timedatectl                 # System clock synchronized: yes 인지
+chronyc tracking            # 기준 소스·오프셋 (chrony)
+chronyc sources -v
+</code></pre>
+<p><strong>다른 호스트(감시 PC)의 질의에 응답 허용</strong> — <code>/etc/chrony/chrony.conf</code>:</p>
+<pre><code>allow 10.0.0.0/24           # 감시 PC가 속한 대역
+</code></pre>
+<p>적용:</p>
+<pre><code class="language-bash">sudo systemctl restart chronyd
+</code></pre>
+<blockquote>
+<p>ntpd 사용 시: <code>/etc/ntp.conf</code>의 <code>restrict</code> 규칙으로 감시 PC 대역의 질의를 허용하고, <code>ntpq -p</code>로 상위 동기 상태를 확인합니다.</p>
+</blockquote>
+<h3 id="33">3.3 계측기·임베디드·네트워크 장비</h3>
+<ul>
+<li>벤더 설정 화면(웹 UI/패널)에서 <strong>NTP 클라이언트(동기)</strong> 와 <strong>NTP 서버(응답)</strong> 항목을 확인합니다.</li>
+<li>일부 장비는 NTP 서버 응답을 지원하지 않습니다 — 이 경우 <strong>본 시스템으로 직접 감시할 수 없습니다.</strong>
+  대안: 그 장비가 동기화하는 상위 NTP 서버를 감시 대상으로 잡거나, 별도 절차로 시각을 주기 점검합니다.</li>
+<li>설정 방법은 벤더 매뉴얼/현장 엔지니어에게 문의하세요. 본 시스템은 <strong>읽기 전용</strong>이라 장비 설정을 강제하지 않습니다.</li>
+</ul>
+<hr />
+<h2 id="4-fs-010">4. 본 시스템에 장비 등록 (FS-010)</h2>
+<ol>
+<li>대시보드 화면 → <strong>장비 등록</strong></li>
+<li><strong>장비 이름</strong>(예: <code>HPLC-WS-01</code>), <strong>IP 또는 호스트</strong>, <strong>동기화 표준</strong> 선택 → <strong>추가</strong></li>
+<li>등록 시 시스템이 <strong>자동으로 NTP 응답을 확인</strong>합니다 — 응답하는 장비만 등록되고, <strong>무응답이면 거부</strong>(422)됩니다.
+   (죽은 장비가 등록부에 들어가 데이터가 오염되는 것을 막는 안전장치)</li>
+</ol>
+<blockquote>
+<p>등록이 거부되면 §2 체크리스트와 §3 설정으로 돌아가세요. 대량 시드 등 예외 상황에서는 검증 우회 옵션이 있으나 운영에서는 권장하지 않습니다.</p>
+</blockquote>
+<hr />
+<h2 id="5">5. 대시보드 상태 읽는 법</h2>
+<table>
+<thead>
+<tr>
+<th>상태 배지</th>
+<th>의미</th>
+<th>조치</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>정상(OK)</strong></td>
+<td>오프셋이 허용 한계 이내</td>
+<td>없음</td>
+</tr>
+<tr>
+<td><strong>한계 초과(BREACH)</strong></td>
+<td>장비 시각이 허용 한계를 벗어남</td>
+<td>§6 — 장비의 상위 시간 동기 점검</td>
+</tr>
+<tr>
+<td><strong>갱신 지연(STALE)</strong></td>
+<td>최근 측정이 없음(폴링 노후)</td>
+<td>스케줄러/네트워크 점검</td>
+</tr>
+<tr>
+<td><strong>응답 없음(UNREACHABLE)</strong></td>
+<td>장비가 NTP 질의에 무응답</td>
+<td>장비 전원·네트워크·NTP 서버 점검</td>
+</tr>
+<tr>
+<td><strong>미측정(UNKNOWN)</strong></td>
+<td>아직 1회도 측정 전</td>
+<td>다음 폴링 주기까지 대기</td>
+</tr>
+</tbody>
+</table>
+<p>표의 <strong>오프셋</strong>은 KRISS 기준 편차(초), <strong>허용 한계</strong>는 표준에 설정한 임계값입니다.</p>
+<hr />
+<h2 id="6">6. 자주 겪는 문제 (트러블슈팅)</h2>
+<table>
+<thead>
+<tr>
+<th>증상</th>
+<th>원인</th>
+<th>해결</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>등록 시 "NTP 응답을 하지 않아 등록할 수 없습니다"(422)</td>
+<td>장비 NTP 서버 미활성 / 방화벽 UDP 123 차단</td>
+<td>§3에서 NTP 서버 응답 활성화, 방화벽 허용</td>
+</tr>
+<tr>
+<td>상태가 <strong>응답 없음(UNREACHABLE)</strong></td>
+<td>장비 꺼짐·네트워크 단절·IP 변경</td>
+<td><code>ping</code>·전원 확인, IP 고정</td>
+</tr>
+<tr>
+<td>상태가 <strong>한계 초과(BREACH)</strong></td>
+<td>장비 시각 자체가 어긋남(상위 동기 실패)</td>
+<td>장비의 NTP 동기 소스 점검(§3 B), <code>w32tm /resync</code></td>
+</tr>
+<tr>
+<td>오프셋이 <strong>비현실적으로 큼</strong></td>
+<td>스푸핑/이상치 → 시스템이 미신뢰 처리</td>
+<td>네트워크 경로·시간원 점검(이상 시 <code>synced=false</code> 표시)</td>
+</tr>
+<tr>
+<td>상태가 계속 <strong>갱신 지연(STALE)</strong></td>
+<td>백그라운드 폴링 중단/주기 과다</td>
+<td>감시 PC 앱 가동·폴링 주기 확인</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="7">7. 정기 점검 권장 (운영)</h2>
+<ul>
+<li><strong>폴링 주기·허용 한계</strong>: 대시보드 <em>동기화 설정</em>에서 조정(변경 시 사유와 함께 이력 기록됨 — 표준 변경 이력).</li>
+<li><strong>한계 초과 로그</strong>: <em>허용 한계 초과 로그</em> 탭에서 주기적으로 검토(최근 1주일 / 지난 이력 기간 조회).</li>
+<li><strong>신규/이전 장비</strong>: IP 변경 시 재등록, 폐기 장비는 등록 해제.</li>
+</ul>
+<hr />
+<h2 id="a">부록 A. 명령어 빠른 참조</h2>
+<table>
+<thead>
+<tr>
+<th>목적</th>
+<th>Windows</th>
+<th>Linux</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>동기화 상태</td>
+<td><code>w32tm /query /status</code></td>
+<td><code>timedatectl</code> / <code>chronyc tracking</code></td>
+</tr>
+<tr>
+<td>설정 확인</td>
+<td><code>w32tm /query /configuration</code></td>
+<td><code>chronyc sources -v</code></td>
+</tr>
+<tr>
+<td>강제 재동기</td>
+<td><code>w32tm /resync</code></td>
+<td><code>sudo chronyc makestep</code></td>
+</tr>
+<tr>
+<td>다른 장비 NTP 응답 테스트</td>
+<td><code>w32tm /stripchart /computer:&lt;IP&gt; /dataonly /samples:3</code></td>
+<td><code>ntpdate -q &lt;IP&gt;</code> 또는 <code>chronyc ntpdata &lt;IP&gt;</code></td>
+</tr>
+<tr>
+<td>시간 서비스 재시작</td>
+<td><code>net stop w32time &amp;&amp; net start w32time</code></td>
+<td><code>sudo systemctl restart chronyd</code></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>모든 명령은 장비/감시 PC에서 <strong>관리자(root) 권한</strong>으로 실행합니다.</p>
+</blockquote>
+</section>
+</main>
+<a class="totop" href="#" title="맨 위로">↑</a>
+<script>
+const links=[...document.querySelectorAll('nav.sidebar a')];
+const map=new Map(links.map(a=>[a.getAttribute('href').slice(1),a]));
+const obs=new IntersectionObserver((es)=>{
+  es.forEach(e=>{if(e.isIntersecting){
+    links.forEach(a=>a.classList.remove('active'));
+    const a=map.get(e.target.id); if(a)a.classList.add('active');
+  }});
+},{rootMargin:'-10% 0px -80% 0px'});
+document.querySelectorAll('section.doc').forEach(s=>obs.observe(s));
+</script>
+</body>
+</html>
