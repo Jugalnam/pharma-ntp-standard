@@ -13,10 +13,12 @@ from sqlalchemy.orm import Session
 
 from app.config import settings
 from app.db import SessionLocal
-from app.models.orm import StandardORM, AssetORM, DeliverableORM, AlertORM
+from app.models.orm import (
+    StandardORM, StandardHistoryORM, AssetORM, DeliverableORM, AlertORM,
+)
 from app.models.schemas import (
     Asset, AssetIn,
-    TimeStandard, TimeStandardIn,
+    TimeStandard, TimeStandardIn, TimeStandardUpdate, StandardHistory,
     Deliverable, DeliverableIn, DeliverableStatus,
     Alert,
 )
@@ -148,6 +150,29 @@ def reference_time():
 
 
 # --- 표준 (FS-001/002) ---
+def _record_standard_history(db: Session, o: StandardORM, reason: str) -> None:
+    """표준의 현재 값 스냅샷을 변경 이력에 append한다(URS-003/FS-002)."""
+    db.add(StandardHistoryORM(
+        standard_id=o.id, version=o.version,
+        name=o.name, source_host=o.source_host,
+        max_offset_ms=o.max_offset_ms, poll_interval_s=o.poll_interval_s,
+        reason=reason or "", actor="system",  # 인증 부재 — system 기록
+        changed_at=datetime.now(timezone.utc),
+    ))
+
+
+def _history_from_orm(r: StandardHistoryORM) -> StandardHistory:
+    changed = r.changed_at  # SQLite는 tz를 잃을 수 있어 UTC 재부여
+    if changed is not None and changed.tzinfo is None:
+        changed = changed.replace(tzinfo=timezone.utc)
+    return StandardHistory(
+        id=r.id, standard_id=r.standard_id, version=r.version,
+        name=r.name, source_host=r.source_host, max_offset_ms=r.max_offset_ms,
+        poll_interval_s=r.poll_interval_s, reason=r.reason, actor=r.actor,
+        changed_at=changed,
+    )
+
+
 @router.get("/standards", response_model=list[TimeStandard])
 def list_standards(db: Session = Depends(get_db)):
     return [TimeStandard.model_validate(s) for s in db.scalars(select(StandardORM)).all()]
@@ -159,20 +184,36 @@ def create_standard(body: TimeStandardIn, db: Session = Depends(get_db)):
     db.add(o)
     db.commit()
     db.refresh(o)
+    _record_standard_history(db, o, "최초 생성")  # FS-002: 이력 v1
+    db.commit()
     return TimeStandard.model_validate(o)
 
 
 @router.put("/standards/{sid}", response_model=TimeStandard)
-def update_standard(sid: int, body: TimeStandardIn, db: Session = Depends(get_db)):
+def update_standard(sid: int, body: TimeStandardUpdate, db: Session = Depends(get_db)):
     o = db.get(StandardORM, sid)
     if o is None:
         raise HTTPException(404, "standard not found")
-    for k, v in body.model_dump().items():
+    for k, v in body.model_dump(exclude={"reason"}).items():
         setattr(o, k, v)
     o.version += 1  # FS-002: 버전 증가
+    _record_standard_history(db, o, body.reason or "(사유 미기재)")  # 변경 이력 기록
     db.commit()
     db.refresh(o)
     return TimeStandard.model_validate(o)
+
+
+@router.get("/standards/{sid}/history", response_model=list[StandardHistory])
+def standard_history(sid: int, db: Session = Depends(get_db)):
+    """표준 변경 이력(버전순). URS-003/FS-002 — 누가(system)·언제·무엇을·왜."""
+    if db.get(StandardORM, sid) is None:
+        raise HTTPException(404, "standard not found")
+    rows = db.scalars(
+        select(StandardHistoryORM)
+        .where(StandardHistoryORM.standard_id == sid)
+        .order_by(StandardHistoryORM.version)
+    ).all()
+    return [_history_from_orm(r) for r in rows]
 
 
 # --- 장비 (FS-010~012) ---
@@ -252,9 +293,31 @@ def dashboard(db: Session = Depends(get_db)):
 
 
 @router.get("/alerts", response_model=list[Alert])
-def list_alerts():
-    """한계초과 로그(FS-023). 인메모리(=DB와 동기) 상태를 반환."""
-    return monitor.alerts
+def list_alerts(
+    since: datetime | None = None,
+    until: datetime | None = None,
+    days: int = 7,
+):
+    """한계초과 로그(FS-023). 인메모리(=DB와 동기) 상태를 최신순으로 반환.
+
+    - 파라미터 없음: **최근 `days`일(기본 7일) + 진행 중(OPEN) 전부** — 오래된 미해제
+      경고도 항상 보이게 한다.
+    - `since`/`until`(ISO): 해당 기간(opened_at 기준) 조회 — '지난 이력' 탭용.
+    """
+    def _aware(dt):  # tz 미지정 입력은 UTC로 간주(인메모리 opened_at은 tz-aware UTC)
+        return dt.replace(tzinfo=timezone.utc) if dt is not None and dt.tzinfo is None else dt
+
+    since, until = _aware(since), _aware(until)
+    if since is not None or until is not None:
+        sel = [
+            a for a in monitor.alerts
+            if (since is None or a.opened_at >= since)
+            and (until is None or a.opened_at <= until)
+        ]
+    else:
+        cutoff = datetime.now(timezone.utc) - timedelta(days=days)
+        sel = [a for a in monitor.alerts if a.opened_at >= cutoff or a.status == "OPEN"]
+    return sorted(sel, key=lambda a: a.opened_at, reverse=True)
 
 
 # --- 검증 산출물 (FS-030/031) ---

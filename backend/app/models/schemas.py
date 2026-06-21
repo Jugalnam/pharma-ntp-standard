@@ -35,10 +35,30 @@ class TimeStandardIn(BaseModel):
     poll_interval_s: int = Field(default=60, ge=1)  # 0/음수 폴링 주기 방지
 
 
+class TimeStandardUpdate(TimeStandardIn):
+    """표준 수정(PUT) 입력. 변경 사유를 함께 받아 이력에 기록한다(URS-003/FS-002)."""
+    reason: str | None = None
+
+
 class TimeStandard(TimeStandardIn):
     model_config = ConfigDict(from_attributes=True)  # ORM → Pydantic 변환
     id: int
     version: int = 1
+
+
+class StandardHistory(BaseModel):
+    """표준 변경 이력 항목(URS-003). 버전별 값 스냅샷 + 사유."""
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    standard_id: int
+    version: int
+    name: str
+    source_host: str
+    max_offset_ms: float
+    poll_interval_s: int
+    reason: str = ""
+    actor: str = "system"
+    changed_at: datetime
 
 
 # --- Asset (FS-010~012) ---

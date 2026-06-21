@@ -91,6 +91,141 @@ h2 {
   }
 }
 
+.tabs {
+  display: flex;
+  gap: 0.4rem;
+}
+.tab {
+  padding: 0.35rem 0.85rem;
+  font-size: 0.85rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: #fff;
+  color: #555;
+  cursor: pointer;
+}
+.tab:hover {
+  background: #f0f0f0;
+}
+.tab--on {
+  background: #1a7f37;
+  border-color: #1a7f37;
+  color: #fff;
+}
+.tab--on:hover {
+  background: #1a7f37;
+}
+
+.field--grow {
+  flex: 1 1 16rem;
+}
+.field--grow input {
+  width: 100%;
+}
+
+.history {
+  margin-top: 1rem;
+}
+.history h3 {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+  color: #555;
+}
+
+.fs-enter {
+  margin-top: 0.6rem;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.85rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: #fff;
+  color: #333;
+  cursor: pointer;
+}
+.fs-enter:hover {
+  background: #f0f0f0;
+}
+
+/* 전체화면 시계 오버레이(FS-042) */
+.fs-overlay {
+  display: none;
+}
+.fs-overlay--on {
+  display: flex;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+  color: #fff;
+  user-select: none;
+}
+.fs-label {
+  font-size: 1.6vw;
+  letter-spacing: 0.05em;
+  color: #888;
+}
+.fs-clock {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+  font-size: 22vw;
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: 0.02em;
+  color: #2ecc71;
+  margin: 1vh 0;
+}
+.fs-clock--stale {
+  color: #e67e22;
+}
+.fs-date {
+  font-size: 2.4vw;
+  color: #bbb;
+}
+.fs-sync {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  margin-top: 3vh;
+  font-size: 1.4vw;
+  color: #2ecc71;
+}
+.fs-sync--stale {
+  color: #e67e22;
+}
+.fs-dot {
+  width: 0.8em;
+  height: 0.8em;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 0.6em currentColor;
+}
+.fs-hint {
+  position: fixed;
+  bottom: 2vh;
+  font-size: 1vw;
+  color: #555;
+}
+.fs-close {
+  position: fixed;
+  top: 2vh;
+  right: 2vw;
+  width: 2.4em;
+  height: 2.4em;
+  font-size: 1.4vw;
+  border: 1px solid #444;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  color: #aaa;
+  cursor: pointer;
+}
+.fs-close:hover {
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+}
+
 .info-box {
   border: 1px solid #e3e3e3;
   border-left: 3px solid #1a7f37;

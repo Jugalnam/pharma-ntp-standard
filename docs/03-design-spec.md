@@ -28,6 +28,7 @@
 | 엔터티 | 주요 필드 | 비고 |
 |--------|----------|------|
 | `TimeStandard` | id, name, source_host(기본 `time.kriss.re.kr`), max_offset_ms, poll_interval_s, version | FS-001/002, KRISS UTC(k) 기준 |
+| `StandardHistory` | id, standard_id, version, name, source_host, max_offset_ms, poll_interval_s, reason, actor, changed_at | FS-002, **영속**(변경 이력, append-only). actor는 인증 부재로 `system` |
 | `Asset` | id, name, hostname, gxp_critical, standard_id | FS-010~012 |
 | `OffsetSample` | asset_id, measured_at, offset_ms, stratum | FS-020/021, **인메모리**(폴링 재생성) |
 | `Alert` | id, asset_id, asset_name, opened_at, closed_at, offset_ms, limit_ms, status | FS-022/023, **영속**(한계초과 로그) |
@@ -41,7 +42,8 @@
 | 메서드 | 경로 | 기능 | FS |
 |--------|------|------|----|
 | GET/POST | `/api/standards` | 표준 목록/생성 | FS-001 |
-| GET/PUT | `/api/standards/{id}` | 표준 조회/수정(버전 증가) | FS-001/002 |
+| GET/PUT | `/api/standards/{id}` | 표준 조회/수정(버전 증가 + 변경 이력 기록) | FS-001/002 |
+| GET | `/api/standards/{id}/history` | 표준 변경 이력(버전별 값 스냅샷·사유) | FS-002 |
 | GET/POST | `/api/assets` | 장비 목록/등록(POST `?validate=true`면 NTP 응답 확인 후 등록) | FS-010 |
 | DELETE | `/api/assets/{id}` | 장비 등록 해제(모니터링 상태 정리) | FS-010 |
 | POST | `/api/assets/{id}/poll` | 장비 1회 수동 폴링(reachable/reference_synced 반환) | FS-020 |
@@ -86,5 +88,5 @@
 | Python | ≥ 3.11 | IQ |
 | FastAPI / uvicorn | requirements.txt 고정 | IQ |
 | Node.js | ≥ 20 | IQ |
-| DB 연결 문자열 | 환경변수 `DATABASE_URL` | IQ |
+| DB 연결 문자열 | 환경변수 `NTP_DATABASE_URL`(기본 SQLite `pharma_ntp.sqlite3`) | IQ |
 | NTP 소스 도달성 | 구성된 source_host | IQ |

@@ -1,5 +1,11 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import './App.css'
+
+// Screen Wake Lock API 최소 타입(브라우저 lib에 없을 수 있어 직접 정의).
+type WakeLockSentinelLike = { release: () => Promise<void> }
+type WakeLockNavigator = Navigator & {
+  wakeLock?: { request: (type: 'screen') => Promise<WakeLockSentinelLike> }
+}
 
 type DashboardRow = {
   asset_id: number
@@ -22,6 +28,7 @@ type Standard = {
   source_host: string
   max_offset_ms: number
   poll_interval_s: number
+  version: number
 }
 type Alert = {
   id: number
@@ -34,6 +41,16 @@ type Alert = {
   status: string
 }
 type RefTime = { stratum: number | null; synced: boolean; source: string }
+type StandardHistory = {
+  id: number
+  version: number
+  name: string
+  max_offset_ms: number
+  poll_interval_s: number
+  reason: string
+  actor: string
+  changed_at: string
+}
 
 const clockFmt = new Intl.DateTimeFormat('ko-KR', {
   timeZone: 'Asia/Seoul',
@@ -75,6 +92,15 @@ const dtFmt = new Intl.DateTimeFormat('ko-KR', {
 })
 const fmtDateTime = (iso: string | null) => (iso ? dtFmt.format(new Date(iso)) : '—')
 
+// 전체화면 시계용 전체 날짜(예: 2026년 6월 21일 일요일)
+const fullDateFmt = new Intl.DateTimeFormat('ko-KR', {
+  timeZone: 'Asia/Seoul',
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+  weekday: 'long',
+})
+
 function App() {
   const [health, setHealth] = useState<string>('확인 중…')
   const [referenceSource, setReferenceSource] = useState<string>('')
@@ -88,20 +114,36 @@ function App() {
   const [addError, setAddError] = useState<string | null>(null)
   const [addOk, setAddOk] = useState<string | null>(null)
 
-  // 한계 초과 로그(Alert)
+  // 한계 초과 로그(Alert) — 탭: 최근 1주일 / 지난 이력(기간 조회)
   const [alerts, setAlerts] = useState<Alert[]>([])
+  const [alertTab, setAlertTab] = useState<'recent' | 'past'>('recent')
+  const ymd = (dt: Date) =>
+    `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`
+  const [pastSince, setPastSince] = useState(() => ymd(new Date(Date.now() - 30 * 86400000)))
+  const [pastUntil, setPastUntil] = useState(() => ymd(new Date()))
+  const [pastAlerts, setPastAlerts] = useState<Alert[]>([])
+  const [pastLoading, setPastLoading] = useState(false)
+  const [pastMsg, setPastMsg] = useState<string | null>(null)
+  const [pastLoaded, setPastLoaded] = useState(false)
 
   // 동기화 설정(표준 편집)
   const [settingsStd, setSettingsStd] = useState<Standard | null>(null)
   const [intervalInput, setIntervalInput] = useState('')
   const [limitInput, setLimitInput] = useState('')
+  const [reasonInput, setReasonInput] = useState('')
   const [savingSettings, setSavingSettings] = useState(false)
   const [settingsMsg, setSettingsMsg] = useState<string | null>(null)
+  const [history, setHistory] = useState<StandardHistory[]>([])
 
   // 대형 시계: /api/time(KRISS 보정 기준시각)을 앵커로 받아 로컬에서 매초 틱.
   const [refSkew, setRefSkew] = useState<number | null>(null)
   const [refMeta, setRefMeta] = useState<RefTime | null>(null)
   const [nowMs, setNowMs] = useState<number>(() => Date.now())
+
+  // 전체화면 시계 모드(FS-042). 화면 절전 억제(Screen Wake Lock) 포함.
+  const [fullscreen, setFullscreen] = useState(false)
+  const overlayRef = useRef<HTMLDivElement>(null)
+  const wakeLockRef = useRef<WakeLockSentinelLike | null>(null)
 
   const loadDashboard = useCallback(
     () =>
@@ -124,6 +166,15 @@ function App() {
     [],
   )
 
+  const loadHistory = useCallback(
+    (sid: number) =>
+      fetch(`/api/standards/${sid}/history`)
+        .then((r) => r.json())
+        .then((d: StandardHistory[]) => setHistory(d))
+        .catch(() => {}),
+    [],
+  )
+
   useEffect(() => {
     fetch('/api/health')
       .then((r) => r.json())
@@ -142,10 +193,11 @@ function App() {
           setSettingsStd(d[0])
           setIntervalInput(String(d[0].poll_interval_s))
           setLimitInput(String(d[0].max_offset_ms / 1000))
+          loadHistory(d[0].id)
         }
       })
       .catch(() => {})
-  }, [])
+  }, [loadHistory])
 
   // 대시보드 + 한계초과 로그 자동 갱신: 마운트 시 1회 + 5초마다
   useEffect(() => {
@@ -184,8 +236,59 @@ function App() {
     return () => clearInterval(id)
   }, [])
 
+  // 화면 절전·화면보호기 억제(localhost/HTTPS에서만 동작). 미지원 시 조용히 무시.
+  const acquireWakeLock = useCallback(async () => {
+    const wl = (navigator as WakeLockNavigator).wakeLock
+    if (!wl) return
+    try {
+      wakeLockRef.current = await wl.request('screen')
+    } catch {
+      // 권한 거부·비보안 컨텍스트 등 — 시계는 계속 동작
+    }
+  }, [])
+
+  // 전체화면 진입 동안: Wake Lock 획득 + 탭 복귀 시 재획득, 해제 시 정리
+  useEffect(() => {
+    if (!fullscreen) return
+    acquireWakeLock()
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') acquireWakeLock()
+    }
+    document.addEventListener('visibilitychange', onVisibility)
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibility)
+      wakeLockRef.current?.release().catch(() => {})
+      wakeLockRef.current = null
+    }
+  }, [fullscreen, acquireWakeLock])
+
+  // ESC 등으로 브라우저 전체화면이 풀리면 오버레이 상태도 동기화
+  useEffect(() => {
+    const onFsChange = () => {
+      if (!document.fullscreenElement) setFullscreen(false)
+    }
+    document.addEventListener('fullscreenchange', onFsChange)
+    return () => document.removeEventListener('fullscreenchange', onFsChange)
+  }, [])
+
+  const enterFullscreen = async () => {
+    setFullscreen(true)
+    try {
+      await overlayRef.current?.requestFullscreen()
+    } catch {
+      // 전체화면 거부 시에도 오버레이는 표시
+    }
+  }
+
+  const exitFullscreen = () => {
+    if (document.fullscreenElement) document.exitFullscreen().catch(() => {})
+    setFullscreen(false)
+  }
+
   const clockText =
     refSkew !== null ? clockFmt.format(new Date(nowMs + refSkew)) : '--:--:--'
+  const fullDateText =
+    refSkew !== null ? fullDateFmt.format(new Date(nowMs + refSkew)) : ''
 
   const submitAsset = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -247,6 +350,7 @@ function App() {
           source_host: settingsStd.source_host,
           max_offset_ms: Math.round(limitSec * 1000),
           poll_interval_s: Math.round(interval),
+          reason: reasonInput.trim() || null,
         }),
       })
       if (res.ok) {
@@ -254,9 +358,11 @@ function App() {
         setSettingsStd(updated)
         setStandards((arr) => arr.map((s) => (s.id === updated.id ? updated : s)))
         setSettingsMsg(
-          `저장됨 — ${updated.poll_interval_s}초마다 측정, 허용 한계 ${(updated.max_offset_ms / 1000).toFixed(1)}초`,
+          `저장됨 (v${updated.version}) — ${updated.poll_interval_s}초마다 측정, 허용 한계 ${(updated.max_offset_ms / 1000).toFixed(1)}초`,
         )
+        setReasonInput('')
         await loadDashboard()
+        await loadHistory(updated.id)
       } else {
         setSettingsMsg(`저장 실패 (HTTP ${res.status})`)
       }
@@ -267,10 +373,92 @@ function App() {
     }
   }
 
+  const loadPastAlerts = async () => {
+    if (!pastSince || !pastUntil) {
+      setPastMsg('시작일과 종료일을 선택하세요.')
+      return
+    }
+    // 로컬 날짜 → UTC ISO(Z). 시작은 그날 00:00, 종료는 그날 23:59:59.999.
+    const params = new URLSearchParams({
+      since: new Date(`${pastSince}T00:00:00`).toISOString(),
+      until: new Date(`${pastUntil}T23:59:59.999`).toISOString(),
+    })
+    setPastLoading(true)
+    setPastMsg(null)
+    try {
+      const r = await fetch(`/api/alerts?${params.toString()}`)
+      const d: Alert[] = await r.json()
+      setPastAlerts(d)
+      setPastLoaded(true)
+      setPastMsg(`${d.length}건 조회됨`)
+    } catch {
+      setPastMsg('조회에 실패했습니다.')
+    } finally {
+      setPastLoading(false)
+    }
+  }
+
+  // 한계 초과 로그 표(최근/지난 이력 공용)
+  const alertTable = (list: Alert[]) => (
+    <table>
+      <thead>
+        <tr>
+          <th>장비</th>
+          <th className="num">측정 오프셋</th>
+          <th className="num">허용 한계</th>
+          <th className="num">발생 시각</th>
+          <th className="num">해제 시각</th>
+          <th className="center">상태</th>
+        </tr>
+      </thead>
+      <tbody>
+        {list.map((al) => (
+          <tr key={al.id}>
+            <td>{al.asset_name || `#${al.asset_id}`}</td>
+            <td className="num">{fmtOffset(al.offset_ms)}</td>
+            <td className="num">{al.limit_ms != null ? fmtLimit(al.limit_ms) : '—'}</td>
+            <td className="num">{fmtDateTime(al.opened_at)}</td>
+            <td className="num">{fmtDateTime(al.closed_at)}</td>
+            <td className="center">
+              <span className={`badge badge--${al.status === 'OPEN' ? 'breach' : 'unreachable'}`}>
+                {al.status === 'OPEN' ? '진행 중' : '해제됨'}
+              </span>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  )
+
   const canSubmit = form.name.trim() && form.hostname.trim() && form.standardId && !adding
 
   return (
     <div className="app">
+      {/* 전체화면 시계(FS-042) — 항상 DOM에 두고 클래스로 표시 전환(전체화면 요청은 사용자 제스처 내에서 안정적) */}
+      <div
+        ref={overlayRef}
+        className={`fs-overlay${fullscreen ? ' fs-overlay--on' : ''}`}
+        aria-hidden={!fullscreen}
+      >
+        <button className="fs-close" onClick={exitFullscreen} title="나가기 (ESC)">
+          ✕
+        </button>
+        <div className="fs-label">KRISS 표준시 · UTC+9 (Asia/Seoul)</div>
+        <div className={`fs-clock${refMeta && !refMeta.synced ? ' fs-clock--stale' : ''}`}>
+          {clockText}
+        </div>
+        <div className="fs-date">{fullDateText}</div>
+        <div className={`fs-sync${refMeta && !refMeta.synced ? ' fs-sync--stale' : ''}`}>
+          <span className="fs-dot" />
+          {refMeta === null
+            ? '동기화 중…'
+            : refMeta.synced
+              ? `동기화 양호 · ${refMeta.source} · stratum ${refMeta.stratum ?? '—'}`
+              : `미검증 — 서버 시각 표시 (${refMeta.source} 도달 실패)`}
+        </div>
+        <div className="fs-hint">ESC 또는 ✕ 로 나가기</div>
+      </div>
+
       <header>
         <h1>pharma-ntp-standard</h1>
         <p className="subtitle">
@@ -295,6 +483,9 @@ function App() {
               ? `${refMeta.source} · stratum ${refMeta.stratum ?? '—'} · 동기화 상태 양호`
               : `${refMeta.source} 도달 실패 — 서버 시각 표시(미검증)`}
         </div>
+        <button className="fs-enter" onClick={enterFullscreen}>
+          ⛶ 전체화면 시계
+        </button>
       </section>
 
       <section className="info-box">
@@ -362,6 +553,15 @@ function App() {
                   onChange={(e) => setLimitInput(e.target.value)}
                 />
               </label>
+              <label className="field field--grow">
+                변경 사유
+                <input
+                  type="text"
+                  placeholder="예: 장비 안정화로 한계 강화"
+                  value={reasonInput}
+                  onChange={(e) => setReasonInput(e.target.value)}
+                />
+              </label>
               <button onClick={saveSettings} disabled={savingSettings}>
                 {savingSettings ? '저장 중…' : '저장'}
               </button>
@@ -370,9 +570,39 @@ function App() {
               표준 '<strong>{settingsStd.name}</strong>'에 적용 · 현재{' '}
               <strong>{settingsStd.poll_interval_s}초</strong>마다 (
               {(settingsStd.poll_interval_s / 60).toFixed(1)}분) 측정, 허용 한계{' '}
-              <strong>{(settingsStd.max_offset_ms / 1000).toFixed(1)}초</strong>
+              <strong>{(settingsStd.max_offset_ms / 1000).toFixed(1)}초</strong> · 버전{' '}
+              <strong>v{settingsStd.version}</strong> · 저장 시 변경 이력이 기록됩니다(FS-002)
             </p>
             {settingsMsg && <div className="ok-msg">{settingsMsg}</div>}
+            {history.length > 0 && (
+              <div className="history">
+                <h3>표준 변경 이력</h3>
+                <table>
+                  <thead>
+                    <tr>
+                      <th className="num">버전</th>
+                      <th className="num">변경 시각</th>
+                      <th className="num">허용 한계</th>
+                      <th className="num">폴링 주기</th>
+                      <th>사유</th>
+                      <th>기록자</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[...history].reverse().map((h) => (
+                      <tr key={h.id}>
+                        <td className="num">v{h.version}</td>
+                        <td className="num">{fmtDateTime(h.changed_at)}</td>
+                        <td className="num">{fmtLimit(h.max_offset_ms)}</td>
+                        <td className="num">{h.poll_interval_s}s</td>
+                        <td>{h.reason || '—'}</td>
+                        <td className="mono">{h.actor}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </>
         ) : (
           <p className="empty">표준이 없습니다.</p>
@@ -474,41 +704,67 @@ function App() {
       <section>
         <div className="section-head">
           <h2>허용 한계 초과 로그</h2>
-          <span className="refresh-note">{alerts.length}건</span>
+          <div className="tabs">
+            <button
+              className={alertTab === 'recent' ? 'tab tab--on' : 'tab'}
+              onClick={() => setAlertTab('recent')}
+            >
+              최근 1주일
+            </button>
+            <button
+              className={alertTab === 'past' ? 'tab tab--on' : 'tab'}
+              onClick={() => setAlertTab('past')}
+            >
+              지난 이력
+            </button>
+          </div>
         </div>
-        {alerts.length === 0 ? (
-          <p className="empty">한계를 초과한 기록이 없습니다.</p>
+
+        {alertTab === 'recent' ? (
+          <>
+            <p className="form-hint">최근 7일 + 진행 중(OPEN) 경고 · {alerts.length}건</p>
+            {alerts.length === 0 ? (
+              <p className="empty">최근 7일간 한계를 초과한 기록이 없습니다.</p>
+            ) : (
+              alertTable(alerts)
+            )}
+          </>
         ) : (
-          <table>
-            <thead>
-              <tr>
-                <th>장비</th>
-                <th className="num">측정 오프셋</th>
-                <th className="num">허용 한계</th>
-                <th className="num">발생 시각</th>
-                <th className="num">해제 시각</th>
-                <th className="center">상태</th>
-              </tr>
-            </thead>
-            <tbody>
-              {[...alerts].reverse().map((al) => (
-                <tr key={al.id}>
-                  <td>{al.asset_name || `#${al.asset_id}`}</td>
-                  <td className="num">{fmtOffset(al.offset_ms)}</td>
-                  <td className="num">{al.limit_ms != null ? fmtLimit(al.limit_ms) : '—'}</td>
-                  <td className="num">{fmtDateTime(al.opened_at)}</td>
-                  <td className="num">{fmtDateTime(al.closed_at)}</td>
-                  <td className="center">
-                    <span
-                      className={`badge badge--${al.status === 'OPEN' ? 'breach' : 'unreachable'}`}
-                    >
-                      {al.status === 'OPEN' ? '진행 중' : '해제됨'}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <>
+            <div className="add-form">
+              <label className="field">
+                시작일
+                <input
+                  type="date"
+                  value={pastSince}
+                  max={pastUntil}
+                  onChange={(e) => setPastSince(e.target.value)}
+                />
+              </label>
+              <label className="field">
+                종료일
+                <input
+                  type="date"
+                  value={pastUntil}
+                  min={pastSince}
+                  onChange={(e) => setPastUntil(e.target.value)}
+                />
+              </label>
+              <button onClick={loadPastAlerts} disabled={pastLoading}>
+                {pastLoading ? '조회 중…' : '조회'}
+              </button>
+            </div>
+            {pastMsg && <div className="ok-msg">{pastMsg}</div>}
+            {pastAlerts.length === 0 ? (
+              <p className="empty">
+                {pastLoaded
+                  ? '선택한 기간에 한계 초과 기록이 없습니다.'
+                  : '기간을 선택하고 조회하세요.'}
+              </p>
+            ) : (
+              alertTable(pastAlerts)
+            )}
+          </>
         )}
       </section>
 

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 프로젝트 개요
 
-제약(GxP) 환경에서 **NTP 시간 동기화 표준을 수립·모니터링·검증**하는 웹 앱이다. 기준 시간 소스는 한국표준과학연구원의 **UTC(KRISS)** (`time.kriss.re.kr`)이며, GMP 데이터 무결성(ALCOA+) / CSV 요구사항을 전제로 **GAMP 5 V 모델**에 따라 설계한다. 현재는 **인메모리 골격** 단계다(영속 저장소·폴링 워커·감사 추적 미연결).
+제약(GxP) 환경에서 **NTP 시간 동기화 표준을 수립·모니터링·검증**하는 웹 앱이다. 기준 시간 소스는 한국표준과학연구원의 **UTC(KRISS)** (`time.kriss.re.kr`)이며, GMP 데이터 무결성(ALCOA+) / CSV 요구사항을 전제로 **GAMP 5 V 모델**에 따라 설계한다. 시스템 영향도는 **직접 영향 시스템(Direct Impact System)** 으로 분류한다(VP §3.2, 2026-06-21) — 단 장비 시계를 *제어*하지 않는 **감시·읽기 전용** 경계를 가지며, 직접 영향의 대상은 데이터 무결성(감시·보고 기록)이다(RISK-001/011). 모니터링 엔진·자동 폴링 스케줄러·영속 저장소(SQLite)·전체화면 시계(FS-042)까지 **구현 완료** 단계이며, 전체 감사 추적은 범위 제외(한계 초과 로그로 대체) 결정이다.
 
 > 공식 인증 제품이 **아니라** UTCk에 *준하는* 오픈소스 참조 구현이다(`README.md`). 실제 규제 환경 적용 시 별도 검증이 필요하다는 전제를 코드/문서 변경 시 깨지 않게 유지한다.
 
@@ -38,13 +38,13 @@ npm run lint       # eslint .
 > 루트의 `UTCk/`·`UTCk.zip`은 KRISS 공식 동기화 프로그램(타사 바이너리) 참조본으로, `.gitignore`로 제외된 **코드베이스 외부** 자료다(분석은 `docs/05-utck-reference-analysis.md`).
 
 **Backend 레이어** (`backend/app/`):
-- `main.py` — FastAPI 진입점, CORS, 라우터 등록
+- `main.py` — FastAPI 진입점, CORS, 라우터 등록. `lifespan`에서 DB 초기화(`init_db`)·경고 로그 복원(`hydrate_from_db`) 후 폴링 스케줄러 기동(`scheduler_enabled`로 토글)
 - `config.py` — `Settings`(pydantic-settings). 환경변수 접두사 `NTP_`. 기준 호스트·기본 오프셋 한계 등
 - `api/routes.py` — 모든 REST 엔드포인트(`/api` prefix). **SQLAlchemy 영속 저장소**(표준/장비/산출물/한계초과 로그)를 `get_db` 세션으로 접근. 한계초과 로그는 폴링 후 DB write-through, 기동 시 `hydrate_from_db`로 복원
 - `db.py` / `models/orm.py` — SQLAlchemy 엔진·세션·Base / ORM 모델(StandardORM·AssetORM·DeliverableORM·AlertORM)
-- `services/ntp.py` — `measure_offset()`: 다중 샘플 **중앙값**으로 오프셋 측정(RISK-004 완화)
+- `services/ntp.py` — `measure_offset()`: 다중 샘플 **중앙값**으로 오프셋 측정(RISK-004 완화). `is_plausible_offset()`: 비현실적으로 큰 오프셋을 스푸핑/이상치로 보고 미신뢰(FS-052/RISK-009, 한계는 `ntp_sanity_bound_ms`)
 - `services/alerts.py` — `is_offset_breach()`: 오프셋 한계 초과 판정. **경계 규칙: 한계와 같으면 합격, 초과해야 경고.** 이 프로젝트에서 가장 위험도 높은 로직(RISK-001)
-- `services/monitor.py` — `Monitor`: 측정(ntp)과 경고 판정(alerts)을 연결하는 모니터링 엔진. 오프셋 샘플 기록, 경고 OPEN↔CLOSED 전이(FS-022/023), 대시보드 상태 `UNKNOWN/STALE/BREACH/OK` 산정. `STALE`은 last_sync 노후(=poll_interval×`STALE_FACTOR` 초과) 감지로 RISK-003 완화. `routes.py`가 전역 `monitor` 인스턴스 보유
+- `services/monitor.py` — `Monitor`: 측정(ntp)과 경고 판정(alerts)을 연결하는 모니터링 엔진. 오프셋 샘플 기록, 경고 OPEN↔CLOSED 전이(FS-022/023), 대시보드 상태 `UNKNOWN/UNREACHABLE/STALE/BREACH/OK` 산정. `STALE`은 last_sync 노후(=poll_interval×`STALE_FACTOR` 초과) 감지로 RISK-003 완화. `routes.py`가 전역 `monitor` 인스턴스 보유
 - `models/schemas.py` — Pydantic 도메인 모델. `*In` 입력 모델을 상속해 `id`/`version` 추가하는 패턴
 
 **Frontend** (`frontend/src/`): 라우터·컴포넌트 분리 없이 단일 `App.tsx` 골격이다. 마운트 시 `/api/health`(상태·기준 소스)와 `/api/dashboard`(장비별 오프셋/상태 행)를 fetch해 표시. 새 화면은 여기서 확장한다 — 별도 컴포넌트 디렉터리는 아직 없다.
@@ -52,6 +52,7 @@ npm run lint       # eslint .
 **핵심 도메인 규칙:**
 - 표준(`TimeStandard`)은 PUT 시 `version`이 증가한다(FS-002).
 - 산출물(`Deliverable`) 상태는 `Draft → Reviewed → Approved → Effective` 순서로만 전이 가능. 건너뛰기·역방향은 409. 규칙은 `routes.py`의 `_TRANSITIONS` 딕셔너리에 정의(RISK-005).
+- `GET /api/time`은 KRISS 기준 시각을 1회 측정해 반환한다(FS-041, 프론트 대형 시계용). server UTC에 KRISS 오프셋을 보정한 '신뢰 시간'을 주며, NTP 도달 실패나 sanity 한계 초과 시 `synced=false`로 server 시각을 폴백한다(로컬 시계 미신뢰 원칙).
 
 ## V 모델 추적성 규약 (이 저장소에서 가장 중요)
 

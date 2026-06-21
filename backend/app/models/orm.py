@@ -22,6 +22,27 @@ class StandardORM(Base):
     version: Mapped[int] = mapped_column(default=1)
 
 
+class StandardHistoryORM(Base):
+    """표준 변경 이력(URS-003/FS-002). 버전별 값 스냅샷 + 변경 사유를 append-only로 보존.
+
+    인증(로그인) 부재로 행위자(actor)는 system/api로만 기록한다(한계 — Part 11 'who'
+    완전 통제는 인증 도입 시).
+    """
+
+    __tablename__ = "standard_history"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    standard_id: Mapped[int]
+    version: Mapped[int]
+    name: Mapped[str]
+    source_host: Mapped[str]
+    max_offset_ms: Mapped[float]
+    poll_interval_s: Mapped[int]
+    reason: Mapped[str] = mapped_column(default="")
+    actor: Mapped[str] = mapped_column(default="system")
+    changed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
 class AssetORM(Base):
     __tablename__ = "assets"
 

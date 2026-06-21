@@ -32,10 +32,10 @@
 | 04 | [위험 평가 (RA)](04-risk-assessment.md) | RISK | 횡단 | Draft |
 | 05 | [UTCk 기준 표준 분석](05-utck-reference-analysis.md) | REF | URS-001 근거 / 교차점검 전제 | Draft |
 | 06 | [추적성 매트릭스 (RTM)](06-traceability-matrix.md) | — | 좌↔우 연결 | Draft |
-| 06 | [IQ 프로토콜](07-iq-protocol.md) | IQ | 우 최하단 | Draft |
-| 07 | [OQ 프로토콜](08-oq-protocol.md) | OQ | 우 중간 | Draft |
-| 08 | [PQ 프로토콜](09-pq-protocol.md) | PQ | 우 최상단 | Draft |
-| 09 | [KRISS 표준 정합성 검증 요약 보고서](10-kriss-conformance-report.md) | VSR | 전체 종합 (KRISS 표준 증명) | Draft |
+| 07 | [IQ 프로토콜](07-iq-protocol.md) | IQ | 우 최하단 | Draft |
+| 08 | [OQ 프로토콜](08-oq-protocol.md) | OQ | 우 중간 | Draft |
+| 09 | [PQ 프로토콜](09-pq-protocol.md) | PQ | 우 최상단 | Draft |
+| 10 | [KRISS 표준 정합성 검증 요약 보고서](10-kriss-conformance-report.md) | VSR | 전체 종합 (KRISS 표준 증명) | Draft |
 | 11 | [규제·산업 모범사례 분석](11-regulatory-best-practices.md) | REG | 횡단 (URS 외부 근거) | Draft |
 
 ## 문서 상태 정의

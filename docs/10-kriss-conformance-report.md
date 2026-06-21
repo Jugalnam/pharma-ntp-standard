@@ -49,7 +49,7 @@ DS-010/020 (source_host=time.kriss.re.kr) ──  IQ-007 (KRISS NTP 도달성)
 | [OQ-020](08-oq-protocol.md) | 폴링 1회(`POST /api/assets/{id}/poll`) | KRISS 라이브 수집, **offset −0.49ms, stratum 3**, OffsetSample 생성 | ✅ PASS |
 | [OQ-021](08-oq-protocol.md) | `/api/dashboard` 조회 | 장비별 offset·stratum·last_sync·status=OK 반환 | ✅ PASS |
 | [OQ-022a/b](08-oq-protocol.md) | 한계 ±1ms 경계 주입(RISK-001) | 한계 이내 미경고/한계 초과 BREACH | ✅ PASS |
-| [PQ-001 / PQ §3](09-pq-protocol.md) | 본 시스템 보고 시각 ↔ 공식 UTCk 표시 시각 동시 비교 | (차이 ≤ 표준 허용 한계로 정합 입증) | ⬜ 예정 |
+| [PQ-001 / PQ §3](09-pq-protocol.md) | 본 시스템 보고 시각 ↔ 공식 UTCk 표시 시각 동시 비교 | (차이 ≤ 표준 허용 한계로 정합 입증) | ⬜ 현장 범위(배포 시 실행) |
 
 > **stratum 3 의 의미:** 본 시스템이 관측한 stratum 3은 응답 서버가 KRISS의 상위(stratum 1/2) 기준 시계로부터 시간을 받는 NTP 계층의 하위 노드임을 가리킨다. 즉 측정 경로의 뿌리가 **KRISS 기준 시계**임을 보이는 직접 증거다.
 
@@ -85,8 +85,8 @@ OffsetSample → is_offset_breach → Alert / Dashboard — 모니터링 출력 
 ## 7. 한계 및 미결 사항 (정직한 고지)
 
 - 본 증명은 **소프트웨어 검증(CSV) 차원의 표준 정합·추적 증명**이며, 공인 교정기관의 **계량학적 소급성(metrological traceability) 인증과는 별개**다. 본 프로젝트는 KRISS 공식 인증 제품이 아니다(REF-001 §5).
-- **PQ §3(UTCk 동시 비교)** 는 미실행(예정) — 완료 시 본 보고서 §4 표를 갱신해 증명을 닫는다.
-- 감사 추적(FS-040/OQ-040)·표준 변경 이력(OQ-002)은 후속 증분 예정(OQ 일탈 #2/#3). 표준 *값*의 무단 변경 방지(RISK-002) 완결은 해당 구현에 의존한다.
+- **PQ §3(UTCk 동시 비교)** 는 **현장 배포 시 실행**(참조 구현 범위 외) — 완료 시 본 보고서 §4 표를 갱신해 증명을 닫는다.
+- **표준 변경 이력(OQ-002)은 구현 완료**(일탈 #2 Closed) — 표준 *값* 변경이 버전별 스냅샷·사유로 추적된다(RISK-002 완화). 전 엔터티 전체 감사 추적(FS-040/OQ-040)은 **범위 제외**(일탈 #3) — 핵심 이벤트는 한계 초과 로그(FS-023)로 기록. 인증 부재로 변경 이력의 '누가'는 `system`이며, 전자서명 기반 완전 통제는 후속이다.
 - 측정은 네트워크 도달성에 의존하며, 폴링 중단은 `STALE` 상태로 감지된다(RISK-003).
 
 ## 8. 승인
