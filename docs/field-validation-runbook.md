@@ -176,23 +176,36 @@ Remove-NetFirewallRule -DisplayName "NTP-KRISS-out"
 
 ---
 
-## 8. 증빙 기록 양식 (실행 시 채움)
+## 8. 증빙 기록 (실행 결과)
 
-| 케이스 | 기대 | 실측 / 증빙(출력·스크린샷 파일명) | 판정(P/F/NA) | 실행자 | 일자 |
-|--------|------|-------------------------------|-------------|--------|------|
-| IQ-001 Python | ≥ 3.11 | | | | |
-| IQ-002 백엔드 deps | 설치 완료 | | | | |
-| IQ-003 Node | ≥ 20 | | | | |
-| IQ-004 프런트 deps | node_modules | | | | |
-| IQ-005 health | 200 ok | | | | |
-| IQ-006 DB 생성 | sqlite3 존재 | | | | |
-| IQ-007 NTP 도달 | stratum 유효 | | | | |
-| OQ 자동(pytest) | 전건 PASS | | | | |
-| OQ-052 바인딩 | 127.0.0.1 only | | | | |
-| OQ-052 외부 거부 | LAN IP 실패 | | | | |
-| OQ-051 읽기전용 | 장비 무변경 | | | | |
-| OQ-050 egress | KRISS만 허용 | | | | **현장** |
-| PQ-001~005 | (위 표) | | | | **현장** |
+> 실행 일자: **2026-06-22**, 이 PC(리허설/개발 PC). 아래 실측은 Claude Code 보조로 수집한 객관 증빙이다.
+> **실행자·QA 검토 서명(§9)은 사람이 직접 작성**한다 — ALCOA+ *Attributable* 원칙상 판정의 책임 귀속은 사람에게 있다.
+> 판정 표기: ✅ P(이 PC 라이브 통과) · ◐ 부분(이 PC 시연, 현장 잔여) · ⏳ 현장(미실행, 현장 범위).
+
+| 케이스 | 기대 | 실측 / 증빙 | 판정 | 일자 |
+|--------|------|------------|------|------|
+| IQ-001 Python | ≥ 3.11 | Python 3.12.2 | ✅ P | 2026-06-22 |
+| IQ-002 백엔드 deps | 설치 완료 | fastapi 0.138.0·sqlalchemy 2.0.51, import OK | ✅ P | 2026-06-22 |
+| IQ-003 Node | ≥ 20 | v22.22.3 | ✅ P | 2026-06-22 |
+| IQ-004 프런트 deps | node_modules | present | ✅ P | 2026-06-22 |
+| IQ-005 health | 200 ok | `{"status":"ok","reference_source":"time.kriss.re.kr"}` | ✅ P | 2026-06-22 |
+| IQ-006 DB 생성 | sqlite3 존재 | pharma_ntp.sqlite3 present | ✅ P | 2026-06-22 |
+| IQ-007 NTP 도달 | stratum 유효 | synced=true, stratum 3, offset +468ms (KRISS) | ✅ P | 2026-06-22 |
+| OQ 자동(pytest) | 전건 PASS | **29 passed** (2.40s) — test_alerts·test_monitor·test_api | ✅ P | 2026-06-22 |
+| OQ-020 폴링·KRISS 보정 | 보정 오프셋·reachable | Label PC(192.0.6.144) 보정 오프셋 측정, reachable=true | ✅ P | 2026-06-22 |
+| OQ-021 대시보드 | 장비별 최신 행 | Label PC offset/stratum/status=OK/last_sync 반환 | ✅ P | 2026-06-22 |
+| OQ-022b/023 한계초과+로그 | BREACH+로그 | 한계 1.0s에서 BREACH→로그 1건(OPEN 11:16:08→CLOSED 11:26:09 KST, offset 1.35s>1.0s) | ✅ P | 2026-06-22 |
+| OQ-025 자동 스케줄러 | 자동 측정·갱신 | 등록 후 수동 폴링 없이 자동 측정·대시보드 자동 갱신 | ✅ P | 2026-06-22 |
+| OQ-041 기준시각 표시 | synced·stratum | synced=true, stratum 3, reference_utc 반환(대형 시계) | ✅ P | 2026-06-22 |
+| OQ-052 바인딩 | 127.0.0.1 only | LocalAddress 127.0.0.1:8000 단독 LISTEN(0.0.0.0 아님) | ✅ P | 2026-06-22 |
+| OQ-052 외부 거부 | LAN IP 실패 | LAN 172.20.240.1:8000 연결 거부, 127.0.0.1만 응답 | ✅ P | 2026-06-22 |
+| OQ-051 읽기전용 | 장비 무변경 | 코드 mode3 전용(`ntp.py` client.request)·mode6/7 부재 확인. 장비 콘솔 전후 비교는 현장 | ◐ 부분 | 2026-06-22 |
+| OQ-050 egress | KRISS만 허용 | 현장 운영 호스트에서 실행(이 PC 미적용 — §6) | ⏳ 현장 | — |
+| PQ-001 UTCk 정합 | 차이 ≤ 한계 | KRISS 실소스로 표준 운영·오프셋 수집 확인; UTCk 공식프로그램 동시비교는 현장 | ◐ 부분 | 2026-06-22 |
+| PQ-002 24h 모니터링 | 폴링 누락 0 | 현장(장기 연속 운영) | ⏳ 현장 | — |
+| PQ-003 대시보드 성능 | ≤ 1초 | 현장(수십 대 규모) | ⏳ 현장 | — |
+| PQ-004 드리프트 경고 | 경고·운영자 인지 | 실장비 1.35s 이탈→경고·로그·화면 표시로 시연(OQ-022b/023). 실운영 재확인은 현장 | ◐ 부분 | 2026-06-22 |
+| PQ-005 산출물 승인 흐름 | 전이·이력 | 미실행 — `/api/deliverables` 생성·상태전이로 별도 수행 가능 | ⏳ 보류 | — |
 
 ## 9. 승인
 

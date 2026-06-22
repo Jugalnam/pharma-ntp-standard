@@ -24,6 +24,8 @@
 | IQ-007 | NTP 소스 도달성 | 구성된 `source_host`로 NTP 질의 | 응답 수신 | ✅ PASS — `time.kriss.re.kr` 응답, stratum 3, offset ≈ −3.07ms |
 
 > 실행 기록: 2026-06-20 / 실행자: 개발(자동화) / 백엔드 테스트 스위트 `pytest` 27건 전체 통과.
+>
+> 재실행(이 PC, 2026-06-22): IQ-001~007 전 항목 라이브 재확인 — Python 3.12.2 · Node v22.22.3 · fastapi 0.138.0 · KRISS stratum 3(synced). 상세 증빙·판정은 [현장 검증 런북 §8](field-validation-runbook.md), 실행자/QA 서명은 런북 §9.
 
 ## 3. 합격 기준
 
