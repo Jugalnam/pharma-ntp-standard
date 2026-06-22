@@ -19,7 +19,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from app.api.routes import router, run_scheduler, hydrate_from_db
+from app.api.routes import router, run_scheduler, hydrate_from_db, seed_default_standard
 from app.config import settings
 from app.db import init_db
 
@@ -41,6 +41,7 @@ def _frontend_dir() -> Path | None:
 async def lifespan(app: FastAPI):
     """앱 수명주기: DB 초기화·경고 로그 복원 후 폴링 스케줄러(FS-024)를 기동·정리한다."""
     init_db()  # 테이블 생성(존재 시 무시)
+    seed_default_standard()  # 빈 DB(첫 실행)면 기본 KRISS 표준 1개 시드
     hydrate_from_db()  # 영속 한계초과 로그로 모니터 상태 복원(재시작 후)
     task = asyncio.create_task(run_scheduler()) if settings.scheduler_enabled else None
     try:

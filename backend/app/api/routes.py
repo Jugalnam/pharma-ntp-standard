@@ -71,6 +71,28 @@ def hydrate_from_db() -> None:
         monitor.hydrate([_alert_from_orm(o) for o in rows])
 
 
+def seed_default_standard() -> None:
+    """표준이 하나도 없으면 KRISS UTC(k) 기본 표준을 1개 생성한다.
+
+    포터블/신규 설치 첫 실행 시 빈 DB라 표준이 없으면 화면에서 장비를 등록할 수
+    없으므로(표준 드롭다운이 비어 선택 불가), 즉시 사용 가능하도록 기본 표준을
+    시드한다. 기존 표준이 있으면(재시작·기존 설치) 아무것도 하지 않는다.
+    """
+    with SessionLocal() as db:
+        if db.scalars(select(StandardORM)).first() is not None:
+            return
+        o = StandardORM(
+            version=1,
+            name="KRISS UTC(k) 표준",
+            source_host=settings.default_ntp_host,
+            max_offset_ms=settings.default_max_offset_ms,
+            poll_interval_s=settings.default_poll_interval_s,
+        )
+        db.add(o)
+        db.commit()
+        logger.info("seeded default standard: %s (%s)", o.name, o.source_host)
+
+
 async def run_scheduler() -> None:
     """주기적 백그라운드 폴링 스케줄러(FS-024, RISK-003 완화).
 
