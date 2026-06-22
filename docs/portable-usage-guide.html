@@ -32,6 +32,10 @@
   p{margin:.5rem 0;}
   code{background:var(--surface2); padding:.08rem .38rem; border-radius:4px; font-size:.9em;
     font-family:ui-monospace,Consolas,monospace;}
+  pre.cmd{background:#1e2127; color:#e6e8eb; padding:.7rem .9rem; border-radius:8px; overflow-x:auto;
+    font-family:ui-monospace,Consolas,monospace; font-size:.83rem; line-height:1.55; margin:.5rem 0;
+    white-space:pre; -webkit-text-size-adjust:100%;}
+  .step-lab{margin:.9rem 0 .2rem; font-weight:600;}
   ol.steps{counter-reset:s; list-style:none; padding-left:0; margin:.6rem 0;}
   ol.steps>li{counter-increment:s; position:relative; padding:.55rem 0 .55rem 2.5rem; border-bottom:1px solid var(--border);}
   ol.steps>li:last-child{border-bottom:none;}
@@ -108,8 +112,28 @@
   <li>응답하면 <strong>등록 완료</strong> → 대시보드에 행이 생기고 자동으로 주기 측정이 시작됩니다.</li>
 </ol>
 <div class="callout">
-  <span class="lab">등록이 거부될 때</span>
-  <em>“NTP 응답을 하지 않아 등록할 수 없습니다”</em> 가 뜨면 장비 쪽 문제입니다 — ① 장비의 NTP 서버 응답이 꺼져 있거나 ② 방화벽이 UDP 123 을 막은 경우. 흔히 개별 PC보다 <strong>사내 NTP 서버·도메인 컨트롤러(DC)</strong> 를 감시 대상으로 잡는 편이 안정적입니다(그쪽은 보통 NTP 응답이 켜져 있습니다).
+  <span class="lab">등록이 거부될 때 — 원인</span>
+  <em>“NTP 응답을 하지 않아 등록할 수 없습니다”</em> 가 뜨면 <strong>대상 장비가 NTP 질의에 답하지 않는</strong> 것입니다(IP가 살아 있어도, ping이 돼도 발생). 원인은 보통 ① 장비의 <strong>NTP 서버(응답) 기능이 꺼짐</strong>, ② <strong>방화벽이 UDP 123 차단</strong>, 둘 중 하나입니다.
+</div>
+
+<h3>조치 방법 — 장비가 NTP 응답을 하게 만들기</h3>
+<p class="step-lab">가장 쉬운 길 — 응답하는 대상을 등록</p>
+<p>개별 PC 대신 <strong>사내 NTP 서버·도메인 컨트롤러(DC)</strong> 의 IP를 등록하세요. 그쪽은 보통 NTP 응답이 켜져 있어 추가 설정 없이 바로 등록됩니다. (장비들도 결국 그 상위 시간원에 맞추므로 상위를 감시하는 편이 효율적입니다.)</p>
+
+<p class="step-lab">특정 Windows 장비를 꼭 감시해야 한다면 (그 장비에서, 관리자 권한)</p>
+<p>① NTP 서버(응답) 기능 켜기 + 서비스 재시작:</p>
+<pre class="cmd">reg add "HKLM\SYSTEM\CurrentControlSet\Services\W32Time\TimeProviders\NtpServer" /v Enabled /t REG_DWORD /d 1 /f
+reg add "HKLM\SYSTEM\CurrentControlSet\Services\W32Time\Config" /v AnnounceFlags /t REG_DWORD /d 5 /f
+net stop w32time &amp;&amp; net start w32time</pre>
+<p>② 방화벽 인바운드 UDP 123 허용:</p>
+<pre class="cmd">netsh advfirewall firewall add rule name="NTP-in" dir=in action=allow protocol=UDP localport=123</pre>
+<p>③ 감시 PC(이 프로그램이 도는 PC)에서 응답 확인 — 오프셋 숫자가 나오면 정상:</p>
+<pre class="cmd">w32tm /stripchart /computer:&lt;장비IP&gt; /dataonly /samples:3</pre>
+<p>확인되면 화면에서 <strong>[추가]</strong> 를 다시 누르면 등록됩니다.</p>
+
+<div class="callout">
+  <span class="lab">Linux · 계측기 · 임베디드 장비</span>
+  Linux는 <code>/etc/chrony/chrony.conf</code> 에 <code>allow &lt;감시PC 대역&gt;</code> 을 넣고 <code>sudo systemctl restart chronyd</code>. 계측기·네트워크 장비는 벤더 설정 화면의 <strong>NTP 서버(응답)</strong> 항목을 켭니다. 응답을 지원하지 않는 장비는 직접 감시할 수 없으니, 그 장비가 동기화하는 <strong>상위 NTP 서버를 대신 감시</strong>하세요.
 </div>
 
 <h2><span class="n">4</span>상태 배지 읽는 법</h2>

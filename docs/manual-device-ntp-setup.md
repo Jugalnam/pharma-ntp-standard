@@ -79,6 +79,12 @@ HKLM\SYSTEM\CurrentControlSet\Services\W32Time\Config
 net stop w32time && net start w32time
 ```
 
+**(D) 방화벽 인바운드 UDP 123 허용** — 감시 PC의 질의가 장비에 닿도록(대상 장비에서):
+```bat
+netsh advfirewall firewall add rule name="NTP-in" dir=in action=allow protocol=UDP localport=123
+```
+출발지를 감시 PC로 한정하려면 `remoteip=<감시PC_IP>` 를 덧붙인다(최소 권한, RISK-010). 적용 후 감시 PC에서 `w32tm /stripchart /computer:<장비IP> /dataonly /samples:3` 으로 응답(오프셋 숫자)이 오는지 확인한다.
+
 > 도메인 가입 PC는 시간 정책(GPO)이 우선될 수 있습니다. AD 도메인 컨트롤러가 시간원이면 감시 대상은 DC 또는 각 PC로 잡습니다.
 
 ### 3.2 Linux 시스템 (chrony / ntpd)

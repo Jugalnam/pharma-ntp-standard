@@ -2668,6 +2668,10 @@ HKLM\SYSTEM\CurrentControlSet\Services\W32Time\Config
 <p>적용 후 서비스 재시작:</p>
 <pre><code class="language-bat">net stop w32time &amp;&amp; net start w32time
 </code></pre>
+<p><strong>(D) 방화벽 인바운드 UDP 123 허용</strong> — 감시 PC의 질의가 장비에 닿도록(대상 장비에서):</p>
+<pre><code class="language-bat">netsh advfirewall firewall add rule name=&quot;NTP-in&quot; dir=in action=allow protocol=UDP localport=123
+</code></pre>
+<p>출발지를 감시 PC로 한정하려면 <code>remoteip=&lt;감시PC_IP&gt;</code> 를 덧붙인다(최소 권한, RISK-010). 적용 후 감시 PC에서 <code>w32tm /stripchart /computer:&lt;장비IP&gt; /dataonly /samples:3</code> 으로 응답(오프셋 숫자)이 오는지 확인한다.</p>
 <blockquote>
 <p>도메인 가입 PC는 시간 정책(GPO)이 우선될 수 있습니다. AD 도메인 컨트롤러가 시간원이면 감시 대상은 DC 또는 각 PC로 잡습니다.</p>
 </blockquote>
