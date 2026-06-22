@@ -43,6 +43,7 @@
 | 문서 | ID | 대상 | 용도 |
 |------|----|----|------|
 | [장비 NTP 설정 확인·등록 매뉴얼](manual-device-ntp-setup.md) | MAN | QC 운영자 | 감시 대상 장비의 NTP 응답 설정·등록·트러블슈팅 실무 절차 |
+| [현장 검증 실행 런북](field-validation-runbook.md) | RUN | 검증 실행자 / QA | IQ 재실행·OQ 자동/현장(OQ-050~052)·PQ를 순서대로 실행하고 증빙 남기는 PowerShell 절차서 |
 
 ## 문서 상태 정의
 

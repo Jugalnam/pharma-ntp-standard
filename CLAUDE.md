@@ -32,6 +32,13 @@ npm run lint       # eslint .
 ```
 백엔드를 먼저 띄워야 대시보드/health가 동작한다. `/api` 프록시는 `vite.config.ts`, CORS는 `http://localhost:5173`만 허용(`app/main.py`).
 
+### 검증 문서 HTML 패키징 (`docs/`)
+```bash
+pip install markdown
+python docs/build_html.py    # docs/*.md → 단일 자체완결 validation-package.html (외부 CDN 없음)
+```
+`docs/` 산출물(00–11 + 운영 매뉴얼)을 사이드바 목차가 있는 인쇄 친화적 HTML 한 파일로 묶는다. 산출물 추가·순서 변경 시 `build_html.py`의 파일 목록도 함께 갱신한다.
+
 ## 아키텍처
 
 3계층 구조 — `docs/`(설계 산출물) → `backend/`(FastAPI) → `frontend/`(React).
@@ -41,7 +48,7 @@ npm run lint       # eslint .
 - `main.py` — FastAPI 진입점, CORS, 라우터 등록. `lifespan`에서 DB 초기화(`init_db`)·경고 로그 복원(`hydrate_from_db`) 후 폴링 스케줄러 기동(`scheduler_enabled`로 토글)
 - `config.py` — `Settings`(pydantic-settings). 환경변수 접두사 `NTP_`. 기준 호스트·기본 오프셋 한계 등
 - `api/routes.py` — 모든 REST 엔드포인트(`/api` prefix). **SQLAlchemy 영속 저장소**(표준/장비/산출물/한계초과 로그)를 `get_db` 세션으로 접근. 한계초과 로그는 폴링 후 DB write-through, 기동 시 `hydrate_from_db`로 복원
-- `db.py` / `models/orm.py` — SQLAlchemy 엔진·세션·Base / ORM 모델(StandardORM·AssetORM·DeliverableORM·AlertORM)
+- `db.py` / `models/orm.py` — SQLAlchemy 엔진·세션·Base / ORM 모델(StandardORM·StandardHistoryORM·AssetORM·DeliverableORM·AlertORM)
 - `services/ntp.py` — `measure_offset()`: 다중 샘플 **중앙값**으로 오프셋 측정(RISK-004 완화). `is_plausible_offset()`: 비현실적으로 큰 오프셋을 스푸핑/이상치로 보고 미신뢰(FS-052/RISK-009, 한계는 `ntp_sanity_bound_ms`)
 - `services/alerts.py` — `is_offset_breach()`: 오프셋 한계 초과 판정. **경계 규칙: 한계와 같으면 합격, 초과해야 경고.** 이 프로젝트에서 가장 위험도 높은 로직(RISK-001)
 - `services/monitor.py` — `Monitor`: 측정(ntp)과 경고 판정(alerts)을 연결하는 모니터링 엔진. 오프셋 샘플 기록, 경고 OPEN↔CLOSED 전이(FS-022/023), 대시보드 상태 `UNKNOWN/UNREACHABLE/STALE/BREACH/OK` 산정. `STALE`은 last_sync 노후(=poll_interval×`STALE_FACTOR` 초과) 감지로 RISK-003 완화. `routes.py`가 전역 `monitor` 인스턴스 보유
@@ -50,7 +57,7 @@ npm run lint       # eslint .
 **Frontend** (`frontend/src/`): 라우터·컴포넌트 분리 없이 단일 `App.tsx` 골격이다. 마운트 시 `/api/health`(상태·기준 소스)와 `/api/dashboard`(장비별 오프셋/상태 행)를 fetch해 표시. 새 화면은 여기서 확장한다 — 별도 컴포넌트 디렉터리는 아직 없다.
 
 **핵심 도메인 규칙:**
-- 표준(`TimeStandard`)은 PUT 시 `version`이 증가한다(FS-002).
+- 표준(`TimeStandard`)은 PUT 시 `version`이 증가하고, 매 변경이 `standard_history` 테이블에 스냅샷+사유로 기록된다(`_record_standard_history`). 이력은 `GET /api/standards/{sid}/history`로 조회(FS-002, OQ-002).
 - 산출물(`Deliverable`) 상태는 `Draft → Reviewed → Approved → Effective` 순서로만 전이 가능. 건너뛰기·역방향은 409. 규칙은 `routes.py`의 `_TRANSITIONS` 딕셔너리에 정의(RISK-005).
 - `GET /api/time`은 KRISS 기준 시각을 1회 측정해 반환한다(FS-041, 프론트 대형 시계용). server UTC에 KRISS 오프셋을 보정한 '신뢰 시간'을 주며, NTP 도달 실패나 sanity 한계 초과 시 `synced=false`로 server 시각을 폴백한다(로컬 시계 미신뢰 원칙).
 
@@ -67,4 +74,4 @@ npm run lint       # eslint .
 
 ## 후속 반복 예정 (현재 미구현)
 
-모니터링 엔진은 구현됐다 — 폴링은 장비 자신(`asset.hostname`)을 질의하고 오프셋을 KRISS 기준으로 보정(장비vsKRISS=(장비vsPC)−(KRISSvsPC), 로컬 시계 미신뢰)하며, 무응답은 `UNREACHABLE`로 구분한다(FS-020). 수동 `POST /api/assets/{id}/poll`과 **자동 백그라운드 스케줄러(FS-024, 병렬 폴링)** 둘 다 동작하고, 프론트 대시보드는 주기적으로 자동 갱신한다. 장비 등록은 NTP 응답 검증 후만 허용(FS-010), 폴링 주기·허용 한계는 화면에서 수정 가능(FS-001), 한계 초과는 **로그(FS-023, `/api/alerts` + 화면 표)** 로 기록한다. 배포는 자세 A(인터넷 ON) + 보안 하드닝(FS-050~052, DS-040): egress는 KRISS UDP 123만 화이트리스트, 앱은 localhost 바인딩, 장비엔 읽기 전용. **감사 추적(FS-040/URS-040)은 범위 제외 결정(2026-06-20)** — 한계 초과 로그로 핵심 이벤트 기록 대체. **영속 저장소(SQLAlchemy/SQLite)는 구현 완료** — 표준·장비·산출물·한계초과 로그가 재시작 후에도 유지(OQ-028). 남은 예정 작업: PostgreSQL 운영 전환, 표준 변경 이력(OQ-002 PARTIAL), 보안 OQ-050~052 현장 실행. 검증 진행 현황은 `docs/07-iq-protocol.md`·`docs/08-oq-protocol.md`의 결과 열 참조.
+모니터링 엔진은 구현됐다 — 폴링은 장비 자신(`asset.hostname`)을 질의하고 오프셋을 KRISS 기준으로 보정(장비vsKRISS=(장비vsPC)−(KRISSvsPC), 로컬 시계 미신뢰)하며, 무응답은 `UNREACHABLE`로 구분한다(FS-020). 수동 `POST /api/assets/{id}/poll`과 **자동 백그라운드 스케줄러(FS-024, 병렬 폴링)** 둘 다 동작하고, 프론트 대시보드는 주기적으로 자동 갱신한다. 장비 등록은 NTP 응답 검증 후만 허용(FS-010), 폴링 주기·허용 한계는 화면에서 수정 가능(FS-001), 한계 초과는 **로그(FS-023, `/api/alerts` + 화면 표)** 로 기록한다. 배포는 자세 A(인터넷 ON) + 보안 하드닝(FS-050~052, DS-040): egress는 KRISS UDP 123만 화이트리스트, 앱은 localhost 바인딩, 장비엔 읽기 전용. **감사 추적(FS-040/URS-040)은 범위 제외 결정(2026-06-20)** — 한계 초과 로그로 핵심 이벤트 기록 대체. **영속 저장소(SQLAlchemy/SQLite)는 구현 완료** — 표준·장비·산출물·한계초과 로그·**표준 변경 이력**이 재시작 후에도 유지(OQ-028). 표준 변경 이력(OQ-002)도 구현 완료(`standard_history`). 남은 예정 작업: PostgreSQL 운영 전환, 보안 OQ-050~052 현장 실행. 검증 진행 현황은 `docs/07-iq-protocol.md`·`docs/08-oq-protocol.md`의 결과 열 참조.

@@ -33,6 +33,7 @@ DOCS = [
     ("10-kriss-conformance-report.md", "doc-10", "10 · KRISS 정합성 보고서 (VSR)"),
     ("11-regulatory-best-practices.md", "doc-11", "11 · 규제·모범사례 (REG)"),
     ("manual-device-ntp-setup.md", "doc-manual", "운영 매뉴얼 · 장비 NTP 설정"),
+    ("field-validation-runbook.md", "doc-runbook", "런북 · 현장 검증 실행"),
 ]
 FILEMAP = {fn: anc for fn, anc, _ in DOCS}
 
